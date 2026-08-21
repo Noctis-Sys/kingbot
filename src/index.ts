@@ -8,6 +8,8 @@ export default {
 
 		const signature = request.headers.get('X-Signature-Ed25519');
 		const timestamp = request.headers.get('X-Signature-Timestamp');
+		console.log('hit', request.method, request.headers.get('x-signature-ed25519')?.slice(0, 10));
+		console.log('key present:', typeof env.DISCORD_PUBLIC_KEY, env.DISCORD_PUBLIC_KEY?.length);
 		const body = await request.text();
 		if(signature === null || timestamp === null) {
 			return new Response('Missing signature or timestamp', { status: 401 });
