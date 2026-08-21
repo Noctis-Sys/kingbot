@@ -31,7 +31,8 @@ export default {
 			return Response.json({
 				type: 4,
 				data: {
-					content: 'PONG'
+					content: 'PONG',
+					flags: 64,
 				}
 			})
 		}
