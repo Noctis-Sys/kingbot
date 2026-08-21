@@ -5,15 +5,15 @@ import {
     type APIChatInputApplicationCommandInteraction,
     type APIApplicationCommandInteractionDataUserOption,
     MessageFlags,
-    APIInteractionResponse,
+    type APIInteractionResponse,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 
 const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 const errorReply = (content: string): APIInteractionResponse => ({
-	type: InteractionResponseType.ChannelMessageWithSource,
-	data: { content, flags: MessageFlags.Ephemeral },
+    type: InteractionResponseType.ChannelMessageWithSource,
+    data: { content, flags: MessageFlags.Ephemeral },
 });
 
 export const duel: Command = {
