@@ -2,7 +2,7 @@ import { verifyKey} from 'discord-interactions';
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		if (request.method === 'POST') {
+		if (request.method !== 'POST') {
 			return new Response('Kingbot is running!');
 		}
 
