@@ -1,4 +1,11 @@
-import { verifyKey} from 'discord-interactions';
+import {
+	InteractionResponseType,
+	InteractionType,
+	MessageFlags,
+	type APIInteraction,
+} from 'discord-api-types/v10';
+import { verifyKey } from 'discord-interactions';
+import { commandMap } from './commands/index';
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -10,7 +17,7 @@ export default {
 		const timestamp = request.headers.get('x-signature-timestamp');
 
 		const body = await request.text();
-		if(signature === null || timestamp === null) {
+		if (signature === null || timestamp === null) {
 			return new Response('Missing signature or timestamp', { status: 401 });
 		}
 		const verifiedKey = await verifyKey(body, signature, timestamp, env.DISCORD_PUBLIC_KEY);
@@ -20,21 +27,21 @@ export default {
 			return new Response('Invalid request', { status: 401 });
 		}
 
-		const interaction = JSON.parse(body);
-		console.log('Interaction:', JSON.stringify(interaction,null,2));
+		const interaction = JSON.parse(body) as APIInteraction;
 
-		if (interaction.type === 1) {
-			return Response.json({ type: 1 });
+		if (interaction.type === InteractionType.Ping) {
+			return Response.json({ type: InteractionResponseType.Pong });
 		}
 
-		if (interaction.type === 2) {
-			return Response.json({
-				type: 4,
-				data: {
-					content: 'PONG',
-					flags: 64,
-				}
-			})
+		if (interaction.type === InteractionType.ApplicationCommand) {
+			const command = commandMap.get(interaction.data.name);
+			if (!command) {
+				return Response.json({
+					type: InteractionResponseType.ChannelMessageWithSource,
+					data: { content: 'Unknown command', flags: MessageFlags.Ephemeral },
+				});
+			}
+			return Response.json(await command.handler(interaction, env, ctx));
 		}
 
 		return new Response('Unhandled interaction type', { status: 400 });

@@ -17,6 +17,7 @@
     "wrangler": "^4.125.0"
   },
   "dependencies": {
+    "discord-api-types": "^0.38.53",
     "discord-interactions": "^4.4.0"
   }
 }
