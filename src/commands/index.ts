@@ -1,5 +1,5 @@
 import { ping } from './ping';
-
-export const commands = [ping];
+import { duel } from './duel';
+export const commands = [ping, duel];
 
 export const commandMap = new Map(commands.map((c) => [c.definition.name, c]));
