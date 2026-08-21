@@ -6,8 +6,8 @@ export default {
 			return new Response('Kingbot is running!');
 		}
 
-		const signature = request.headers.get('X-Signature-Ed25519');
-		const timestamp = request.headers.get('X-Signature-Timestamp');
+		const signature = request.headers.get('x-signature-ed25519');
+		const timestamp = request.headers.get('x-signature-timestamp');
 		console.log('hit', request.method, request.headers.get('x-signature-ed25519')?.slice(0, 10));
 		console.log('key present:', typeof env.DISCORD_PUBLIC_KEY, env.DISCORD_PUBLIC_KEY?.length);
 		const body = await request.text();
