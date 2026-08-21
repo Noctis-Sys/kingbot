@@ -24,7 +24,7 @@ export default {
 		const interaction = JSON.parse(body);
 		console.log('Interaction:', JSON.stringify(interaction,null,2));
 
-		if (interaction.type === 1) {
+		if (interaction.type !== 1) {
 			return Response.json({ type: 1 });
 		}
 
