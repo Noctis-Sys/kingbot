@@ -8,7 +8,7 @@ export default {
 
 		const signature = request.headers.get('x-signature-ed25519');
 		const timestamp = request.headers.get('x-signature-timestamp');
-		
+
 		const body = await request.text();
 		if(signature === null || timestamp === null) {
 			return new Response('Missing signature or timestamp', { status: 401 });
@@ -25,6 +25,15 @@ export default {
 
 		if (interaction.type === 1) {
 			return Response.json({ type: 1 });
+		}
+
+		if (interaction.type === 2) {
+			return Response.json({
+				type: 4,
+				data: {
+					content: 'PONG'
+				}
+			})
 		}
 
 		return new Response('Unhandled interaction type', { status: 400 });
