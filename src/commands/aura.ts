@@ -39,7 +39,7 @@ export const aura: Command = {
             target = i.data.resolved.users[option.value];
         }
        
-        const content = `<@${target.id}>'s aura number is ${randInt(1, 100)}.`;
+        const content = `<@${target.id}> has ${randInt(1, 1000)} aura`;
         return {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
