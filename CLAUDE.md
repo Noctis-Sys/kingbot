@@ -16,6 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run register:guild` | PUT the command definitions to the test guild (see *Shipping a command*) |
 | `npm run register:global` | Same PUT, but to the global scope |
 | `npm run register:clear-guild` | PUT an empty array to the test guild, removing its commands |
+| `npm run register:clear-global` | PUT an empty array globally, removing every global command (prompts to confirm) |
 | `npm test` | Vitest in watch mode; `npx vitest run` for a single pass |
 | `npm run deploy` | Deploy to Cloudflare |
 | `npm run cf-typegen` | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc` **and `.dev.vars`** |
@@ -50,10 +51,11 @@ Deploying the Worker does **not** tell Discord the command exists. After changin
 - `npm run register:guild` → scope `guild`: PUTs to `DISCORD_TEST_GUILD_ID`. Instant — use this while developing.
 - `npm run register:global` → scope `global`: PUTs to every guild, **excluding** `developerOnly` commands; propagation can take up to an hour.
 - `npm run register:clear-guild` → scope `clear-guild`: PUTs `[]` to the test guild, removing its commands.
+- `npm run register:clear-global` → scope `clear-global`: PUTs `[]` to the global scope, removing every global command. Prompts for confirmation on stdin; pass `-- --yes` to skip the prompt, which is **required** without a TTY — it refuses to run rather than proceeding unconfirmed. Guild-scoped registrations are untouched.
 
 `guild` and `clear-guild` **throw** when `DISCORD_TEST_GUILD_ID` is unset — there is no fallback to global. A missing or unrecognized scope throws listing the valid ones rather than picking a target — so a bare `npx tsx --env-file=.env scripts/register.ts` is safe and self-documenting.
 
-Each scope is one entry in the `scopeHandlers` record, returning the `{ url, payload, summary }` for that scope. Adding a scope means adding it to `SCOPES` *and* to that record — the `Record<Scope, …>` type makes a missing handler a compile error.
+Each scope is one entry in the `scopeHandlers` record, returning the `{ url, payload, summary }` for that scope — plus an optional `confirm` prompt, which is what marks a scope destructive enough to ask first. Adding a scope means adding it to `SCOPES` *and* to that record — the `Record<Scope, …>` type makes a missing handler a compile error.
 
 `scripts/register.ts` runs in **Node**, not workerd (`tsx --env-file=.env`), which is why it reads `process.env` and why `scripts/` is in the root tsconfig's `include`.
 

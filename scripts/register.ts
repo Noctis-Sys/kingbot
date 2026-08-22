@@ -1,9 +1,12 @@
+import { createInterface } from 'node:readline/promises';
 import { commands } from '../src/commands/index';
 import type { Command } from '../src/commands/types';
 import type { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 
-const SCOPES = ['guild', 'global', 'clear-guild'] as const;
+const SCOPES = ['guild', 'global', 'clear-guild', 'clear-global'] as const;
 type Scope = (typeof SCOPES)[number];
+
+const YES = ['y', 'yes'];
 
 interface ScopeContext {
 	appId: string;
@@ -15,6 +18,7 @@ interface Registration {
 	url: string;
 	payload: RESTPostAPIApplicationCommandsJSONBody[];
 	summary: string;
+	confirm?: string;
 }
 
 const parseScope = (raw: string | undefined): Scope => {
@@ -33,6 +37,16 @@ const guildUrl = ({ appId, guildId }: ScopeContext): string => {
 };
 
 const definitionsOf = (commands: Command[]): RESTPostAPIApplicationCommandsJSONBody[] => commands.map((c) => c.definition);
+
+const confirmed = async (question: string): Promise<boolean> => {
+	if (!process.stdin.isTTY) {
+		throw new Error('Refusing to run without confirmation: no TTY to prompt on. Pass --yes to confirm non-interactively.');
+	}
+	const rl = createInterface({ input: process.stdin, output: process.stdout });
+	const answer = await rl.question(`${question} [y/N] `);
+	rl.close();
+	return YES.includes(answer.trim().toLowerCase());
+};
 
 const scopeHandlers: Record<Scope, (ctx: ScopeContext) => Registration> = {
 	guild: (ctx) => ({
@@ -54,20 +68,35 @@ const scopeHandlers: Record<Scope, (ctx: ScopeContext) => Registration> = {
 		url: guildUrl(ctx),
 		payload: [],
 		summary: `Cleared all guild commands from guild ${ctx.guildId}`,
+		confirm: 'Clear ALL guild commands for this application?',
+	}),
+	'clear-global': (ctx) => ({
+		url: `https://discord.com/api/v10/applications/${ctx.appId}/commands`,
+		payload: [],
+		summary: 'Cleared all global commands (propagation can take up to an hour)',
+		confirm: 'Clear ALL global commands for this application?',
 	}),
 };
 
 async function main() {
+	const args = process.argv.slice(2);
+	const scope = parseScope(args.find((a) => !a.startsWith('-')));
+	const assumeYes = args.includes('--yes') || args.includes('-y');
+
 	const appId = process.env.DISCORD_APPLICATION_ID;
 	const token = process.env.DISCORD_TOKEN;
 	const guildId = process.env.DISCORD_TEST_GUILD_ID;
-	const scope = parseScope(process.argv[2]);
 
 	if (!appId || !token) {
 		throw new Error('DISCORD_APPLICATION_ID and DISCORD_TOKEN must be set in .env');
 	}
 
-	const { url, payload, summary } = scopeHandlers[scope]({ appId, guildId, commands });
+	const { url, payload, summary, confirm } = scopeHandlers[scope]({ appId, guildId, commands });
+
+	if (confirm && !assumeYes && !(await confirmed(confirm))) {
+		console.log('Aborted.');
+		return;
+	}
 
 	const res = await fetch(url, {
 		method: 'PUT',

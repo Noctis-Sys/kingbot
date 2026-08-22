@@ -29,6 +29,7 @@ export default {
 
 		const interaction = JSON.parse(body) as APIInteraction;
 
+		
 		if (interaction.type === InteractionType.Ping) {
 			return Response.json({ type: InteractionResponseType.Pong });
 		}

@@ -10,7 +10,8 @@
     "cf-typegen": "wrangler types",
     "register:guild": "tsx --env-file=.env scripts/register.ts guild",
     "register:global": "tsx --env-file=.env scripts/register.ts global",
-    "register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild"
+    "register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
+    "register:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
