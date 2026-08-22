@@ -34,8 +34,12 @@ export const aura: Command = {
                 o.name === 'target' && o.type === ApplicationCommandOptionType.User
         );
 
-        const target = option ? option : invoker;
-        const content = `<@${target}>'s aura number is ${randInt(1, 100)}.`;
+        let target = invoker;
+        if(option && i.data.resolved?.users?.[option.value]) {
+            target = i.data.resolved.users[option.value];
+        }
+       
+        const content = `<@${target.id}>'s aura number is ${randInt(1, 100)}.`;
         return {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
