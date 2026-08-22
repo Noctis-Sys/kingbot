@@ -8,13 +8,9 @@ import {
     type APIInteractionResponse,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
+import { errorReply } from '../util/errorHandling';
 
 const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-const errorReply = (content: string): APIInteractionResponse => ({
-    type: InteractionResponseType.ChannelMessageWithSource,
-    data: { content, flags: MessageFlags.Ephemeral },
-});
 
 export const duel: Command = {
     definition: {
