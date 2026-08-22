@@ -6,9 +6,11 @@ import {
     type APIApplicationCommandInteractionDataUserOption
 } from 'discord-api-types/v10';
 import { errorReply } from '../util/errorHandling';
+import { randInt } from '../util/math';
 
-const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-
+/**
+ * A command that allows users to check their aura number or the aura number of another user. The aura number is randomly generated between 1 and 1000.
+ */
 export const aura: Command = {
     definition: {
         name: 'aura',

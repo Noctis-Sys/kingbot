@@ -4,6 +4,9 @@ import type {
 	RESTPostAPIApplicationCommandsJSONBody,
 } from 'discord-api-types/v10';
 
+/**
+ * Represents a command that can be registered with the Discord API and executed in response to an interaction.
+ */
 export interface Command {
 	definition: RESTPostAPIApplicationCommandsJSONBody;
 	handler: (

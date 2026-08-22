@@ -9,9 +9,12 @@ import {
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
+import { randInt } from '../util/math';
 
-const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+/**
+ * A command that allows users to duel each other in a simulated shootout. The command randomly determines the winner based on a 50/50 chance.
+ */
 export const duel: Command = {
     definition: {
         name: 'duel',
