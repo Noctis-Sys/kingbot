@@ -14,4 +14,5 @@ export interface Command {
 		env: Env,
 		ctx: ExecutionContext,
 	) => Promise<APIInteractionResponse>;
+	developerOnly?: boolean;
 }

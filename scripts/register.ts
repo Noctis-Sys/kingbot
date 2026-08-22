@@ -1,4 +1,5 @@
 import { commands } from '../src/commands/index';
+import type { Command } from '../src/commands/types';
 import type { RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v10';
 
 const SCOPES = ['guild', 'global', 'clear-guild'] as const;
@@ -7,7 +8,7 @@ type Scope = (typeof SCOPES)[number];
 interface ScopeContext {
 	appId: string;
 	guildId: string | undefined;
-	definitions: RESTPostAPIApplicationCommandsJSONBody[];
+	commands: Command[];
 }
 
 interface Registration {
@@ -31,17 +32,24 @@ const guildUrl = ({ appId, guildId }: ScopeContext): string => {
 	return `https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`;
 };
 
+const definitionsOf = (commands: Command[]): RESTPostAPIApplicationCommandsJSONBody[] => commands.map((c) => c.definition);
+
 const scopeHandlers: Record<Scope, (ctx: ScopeContext) => Registration> = {
 	guild: (ctx) => ({
 		url: guildUrl(ctx),
-		payload: ctx.definitions,
-		summary: `Registered ${ctx.definitions.length} command(s) to guild ${ctx.guildId}`,
+		payload: definitionsOf(ctx.commands),
+		summary: `Registered ${ctx.commands.length} command(s) to guild ${ctx.guildId}`,
 	}),
-	global: (ctx) => ({
-		url: `https://discord.com/api/v10/applications/${ctx.appId}/commands`,
-		payload: ctx.definitions,
-		summary: `Registered ${ctx.definitions.length} command(s) globally (propagation can take up to an hour)`,
-	}),
+	global: (ctx) => {
+		const shipped = ctx.commands.filter((c) => !c.developerOnly);
+		const held = ctx.commands.length - shipped.length;
+		const heldNote = held > 0 ? `, skipping ${held} developer-only` : '';
+		return {
+			url: `https://discord.com/api/v10/applications/${ctx.appId}/commands`,
+			payload: definitionsOf(shipped),
+			summary: `Registered ${shipped.length} command(s) globally${heldNote} (propagation can take up to an hour)`,
+		};
+	},
 	'clear-guild': (ctx) => ({
 		url: guildUrl(ctx),
 		payload: [],
@@ -59,8 +67,7 @@ async function main() {
 		throw new Error('DISCORD_APPLICATION_ID and DISCORD_TOKEN must be set in .env');
 	}
 
-	const definitions = commands.map((c) => c.definition);
-	const { url, payload, summary } = scopeHandlers[scope]({ appId, guildId, definitions });
+	const { url, payload, summary } = scopeHandlers[scope]({ appId, guildId, commands });
 
 	const res = await fetch(url, {
 		method: 'PUT',

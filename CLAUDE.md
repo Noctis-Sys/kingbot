@@ -30,7 +30,7 @@ Bundle without deploying: `npx wrangler deploy --dry-run --outdir .wrangler/dryr
 
 **`src/commands/index.ts` is the single registration point.** The `commands` array there feeds two consumers: `commandMap` (keyed on `definition.name`, used for runtime dispatch) and `scripts/register.ts` (the definitions PUT to Discord). Adding a command means creating the module and appending it to that array — nothing else discovers commands.
 
-**The `Command` interface (`src/commands/types.ts`)** pairs a `definition` (`RESTPostAPIApplicationCommandsJSONBody`, what Discord registers) with a `handler` returning an `APIInteractionResponse`. Handlers are called with `(interaction, env, ctx)` — no current command uses `env` or `ctx`, but they are threaded through and are the seam for anything needing secrets or `waitUntil`. Handlers receive the broad `APIApplicationCommandInteraction`; existing commands narrow it with a local `const i = interaction as APIChatInputApplicationCommandInteraction` before touching `i.data.options`.
+**The `Command` interface (`src/commands/types.ts`)** pairs a `definition` (`RESTPostAPIApplicationCommandsJSONBody`, what Discord registers) with a `handler` returning an `APIInteractionResponse`. Handlers are called with `(interaction, env, ctx)` — no current command uses `env` or `ctx`, but they are threaded through and are the seam for anything needing secrets or `waitUntil`. Handlers receive the broad `APIApplicationCommandInteraction`; existing commands narrow it with a local `const i = interaction as APIChatInputApplicationCommandInteraction` before touching `i.data.options`. An optional `developerOnly: true` (currently on `ping`) holds the command back from global registration; it is a *registration-time* filter only — `commandMap` still dispatches it wherever it is already registered.
 
 **Interaction payload idioms.** The invoker is `interaction.member?.user ?? interaction.user` — `member` in a guild, `user` in DMs, so both must be checked. Option values for user options are *IDs*; the user object comes from `i.data.resolved.users[option.value]`. Options are found with a type predicate on both `name` and `type`. Every message that mentions a user sets `allowed_mentions: { parse: [], users: [] }` so the bot renders `<@id>` without pinging.
 
@@ -48,7 +48,7 @@ Deploying the Worker does **not** tell Discord the command exists. After changin
 `scripts/register.ts` **requires** the target scope as its one positional argument — there is no default. Each npm script passes one:
 
 - `npm run register:guild` → scope `guild`: PUTs to `DISCORD_TEST_GUILD_ID`. Instant — use this while developing.
-- `npm run register:global` → scope `global`: PUTs to every guild; propagation can take up to an hour.
+- `npm run register:global` → scope `global`: PUTs to every guild, **excluding** `developerOnly` commands; propagation can take up to an hour.
 - `npm run register:clear-guild` → scope `clear-guild`: PUTs `[]` to the test guild, removing its commands.
 
 `guild` and `clear-guild` **throw** when `DISCORD_TEST_GUILD_ID` is unset — there is no fallback to global. A missing or unrecognized scope throws listing the valid ones rather than picking a target — so a bare `npx tsx --env-file=.env scripts/register.ts` is safe and self-documenting.
