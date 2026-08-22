@@ -4,8 +4,6 @@ import {
     InteractionResponseType,
     type APIChatInputApplicationCommandInteraction,
     type APIApplicationCommandInteractionDataUserOption,
-    MessageFlags,
-    type APIInteractionResponse,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
