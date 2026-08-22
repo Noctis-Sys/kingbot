@@ -6,6 +6,7 @@ import {
 } from 'discord-api-types/v10';
 import { verifyKey } from 'discord-interactions';
 import { commandMap } from './commands/index';
+import { errorReply } from './util/errorHandling';
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -29,20 +30,25 @@ export default {
 
 		const interaction = JSON.parse(body) as APIInteraction;
 
-		
+
 		if (interaction.type === InteractionType.Ping) {
 			return Response.json({ type: InteractionResponseType.Pong });
 		}
 
 		if (interaction.type === InteractionType.ApplicationCommand) {
-			const command = commandMap.get(interaction.data.name);
-			if (!command) {
-				return Response.json({
-					type: InteractionResponseType.ChannelMessageWithSource,
-					data: { content: 'Unknown command', flags: MessageFlags.Ephemeral },
-				});
+			try {
+				const command = commandMap.get(interaction.data.name);
+				if (!command) {
+					return Response.json({
+						type: InteractionResponseType.ChannelMessageWithSource,
+						data: { content: 'Unknown command', flags: MessageFlags.Ephemeral },
+					});
+				}
+				return Response.json(await command.handler(interaction, env, ctx));
+			} catch (error) {
+				console.error('Error handling application command:', error);
+				return Response.json(errorReply('An error occurred while processing the command. Please try again later.'));
 			}
-			return Response.json(await command.handler(interaction, env, ctx));
 		}
 
 		return new Response('Unhandled interaction type', { status: 400 });
