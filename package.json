@@ -8,7 +8,9 @@
     "start": "wrangler dev",
     "test": "vitest",
     "cf-typegen": "wrangler types",
-    "register": "tsx --env-file=.env scripts/register.ts"
+    "register:guild": "tsx --env-file=.env scripts/register.ts guild",
+    "register:global": "tsx --env-file=.env scripts/register.ts global",
+    "register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
