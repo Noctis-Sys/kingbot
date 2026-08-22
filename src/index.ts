@@ -46,7 +46,7 @@ export default {
 				}
 				return Response.json(await command.handler(interaction, env, ctx));
 			} catch (error) {
-				console.error('Error handling application command:', error);
+				console.error(`[${interaction.data.name}] Error handling command:`, error);
 				return Response.json(errorReply('An error occurred while processing the command. Please try again later.'));
 			}
 		}
