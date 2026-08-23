@@ -39,6 +39,7 @@ export default {
 			try {
 				const command = commandMap.get(interaction.data.name);
 				if (!command) {
+					console.log(`[${interaction.data.name}] Unknown command`);
 					return Response.json({
 						type: InteractionResponseType.ChannelMessageWithSource,
 						data: { content: 'Unknown command', flags: MessageFlags.Ephemeral },
