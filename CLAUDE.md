@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run dev` | Local dev server (`wrangler dev`) on http://localhost:8787 |
 | `npm run register:guild` | PUT the command definitions to the test guild (see *Shipping a command*) |
 | `npm run register:global` | Same PUT, but to the global scope |
-| `npm run register:clear-guild` | PUT an empty array to the test guild, removing its commands |
+| `npm run register:clear-guild` | PUT an empty array to the test guild, removing its commands (prompts to confirm) |
 | `npm run register:clear-global` | PUT an empty array globally, removing every global command (prompts to confirm) |
 | `npm test` | Vitest in watch mode; `npx vitest run` for a single pass |
 | `npm run deploy` | Deploy to Cloudflare |
@@ -29,15 +29,15 @@ Bundle without deploying: `npx wrangler deploy --dry-run --outdir .wrangler/dryr
 
 **One handler, one dispatch table.** `src/index.ts` is the whole request pipeline: non-POST returns the liveness string `"Kingbot is running!"`; POST verifies the Ed25519 signature with `verifyKey` against `env.DISCORD_PUBLIC_KEY` (401 on a missing or bad signature), answers `InteractionType.Ping` with a Pong, then looks the command up in `commandMap`. An unknown name returns an ephemeral `"Unknown command"` reply; anything that is not `ApplicationCommand` falls through to a 400. The raw body must be read as text *before* parsing — `verifyKey` signs the exact bytes, so never `request.json()` first.
 
-**`src/commands/index.ts` is the single registration point.** The `commands` array there feeds two consumers: `commandMap` (keyed on `definition.name`, used for runtime dispatch) and `scripts/register.ts` (the definitions PUT to Discord). Adding a command means creating the module and appending it to that array — nothing else discovers commands.
+**`src/commands/index.ts` is the single registration point.** The `commands` array there (currently `[ping, duel, aura, sens]`) feeds two consumers: `commandMap` (keyed on `definition.name`, used for runtime dispatch) and `scripts/register.ts` (the definitions PUT to Discord). Adding a command means creating the module and appending it to that array — nothing else discovers commands.
 
 **The `Command` interface (`src/commands/types.ts`)** pairs a `definition` (`RESTPostAPIApplicationCommandsJSONBody`, what Discord registers) with a `handler` returning an `APIInteractionResponse`. Handlers are called with `(interaction, env, ctx)` — no current command uses `env` or `ctx`, but they are threaded through and are the seam for anything needing secrets or `waitUntil`. Handlers receive the broad `APIApplicationCommandInteraction`; existing commands narrow it with a local `const i = interaction as APIChatInputApplicationCommandInteraction` before touching `i.data.options`. An optional `developerOnly: true` (currently on `ping`) holds the command back from global registration; it is a *registration-time* filter only — `commandMap` still dispatches it wherever it is already registered.
 
-**Interaction payload idioms.** The invoker is `interaction.member?.user ?? interaction.user` — `member` in a guild, `user` in DMs, so both must be checked. Option values for user options are *IDs*; the user object comes from `i.data.resolved.users[option.value]`. Options are found with a type predicate on both `name` and `type`. Every message that mentions a user sets `allowed_mentions: { parse: [], users: [] }` so the bot renders `<@id>` without pinging.
+**Interaction payload idioms.** The invoker is `interaction.member?.user ?? interaction.user` — `member` in a guild, `user` in DMs, so both must be checked. Option values for user options are *IDs*; the user object comes from `i.data.resolved.users[option.value]`. Options are found by matching both `name` and `type` — `aura`/`duel` inline a type predicate for their `User` option, while `sens` goes through `getStringOption` (`src/util/options.ts`) for its `String` one. A `String` option with a `choices` list still needs its value re-checked at runtime: `sens` looks the choice up in a `Map` and falls back to `errorReply` when it misses. Every message that mentions a user sets `allowed_mentions: { parse: [], users: [] }` so the bot renders `<@id>` without pinging.
 
-**Failure replies go through `errorReply`** (`src/util/errorHandling.ts`), which produces an ephemeral message. Handlers return these instead of throwing — a thrown error would surface to the user as "The application did not respond".
+**Failure replies go through `errorReply`** (`src/util/errorHandling.ts`), which produces an ephemeral message. Handlers return these instead of throwing — a thrown error would surface to the user as "The application did not respond". `index.ts` does wrap the dispatch in a `try`/`catch` that logs `[name] Error handling command:` and returns a generic `errorReply`, but that is a backstop, not the intended path.
 
-**Shared helpers live in `src/util/`.** Besides `errorHandling.ts`, `math.ts` exports `randInt(min, max)` (inclusive on both ends), used by `aura` and `duel` for their rolls.
+**Shared helpers live in `src/util/`.** Besides `errorHandling.ts`: `math.ts` exports `randInt(min, max)` (inclusive on both ends), used by `aura` and `duel` for their rolls; `options.ts` exports `getStringOption(options, name)`, returning a `String` option value or `undefined`. There is no user-option equivalent — `aura` and `duel` each still hand-roll that lookup.
 
 ## Shipping a command (two independent steps)
 
@@ -50,8 +50,8 @@ Deploying the Worker does **not** tell Discord the command exists. After changin
 
 - `npm run register:guild` → scope `guild`: PUTs to `DISCORD_TEST_GUILD_ID`. Instant — use this while developing.
 - `npm run register:global` → scope `global`: PUTs to every guild, **excluding** `developerOnly` commands; propagation can take up to an hour.
-- `npm run register:clear-guild` → scope `clear-guild`: PUTs `[]` to the test guild, removing its commands.
-- `npm run register:clear-global` → scope `clear-global`: PUTs `[]` to the global scope, removing every global command. Prompts for confirmation on stdin; pass `-- --yes` to skip the prompt, which is **required** without a TTY — it refuses to run rather than proceeding unconfirmed. Guild-scoped registrations are untouched.
+- `npm run register:clear-guild` → scope `clear-guild`: PUTs `[]` to the test guild, removing its commands. Prompts to confirm, same as `clear-global` below.
+- `npm run register:clear-global` → scope `clear-global`: PUTs `[]` to the global scope, removing every global command. Prompts for confirmation on stdin; pass `-- --yes` (or `-- -y`) to skip the prompt, which is **required** without a TTY — it refuses to run rather than proceeding unconfirmed. Guild-scoped registrations are untouched.
 
 `guild` and `clear-guild` **throw** when `DISCORD_TEST_GUILD_ID` is unset — there is no fallback to global. A missing or unrecognized scope throws listing the valid ones rather than picking a target — so a bare `npx tsx --env-file=.env scripts/register.ts` is safe and self-documenting.
 
@@ -75,7 +75,7 @@ Two gitignored files hold the same four keys — `DISCORD_PUBLIC_KEY`, `DISCORD_
 `npx vitest run` currently fails, for two separate reasons:
 
 1. `test/index.spec.ts` is still the untouched scaffold asserting `"Hello World!"`; the Worker now answers `"Kingbot is running!"` to GET.
-2. More fundamentally, the suite fails to even *import*. `discord-api-types/v10` has separate `require`/`import` export conditions; inside the vitest workers pool it resolves to the CJS build (`v10.js`), where the runtime enums arrive as `undefined`. `aura.ts` and `duel.ts` read `ApplicationCommandOptionType.User` at module scope for their option `type`, so importing `src/index.ts` throws `TypeError: Cannot read properties of undefined (reading 'User')` before any test runs.
+2. More fundamentally, the suite fails to even *import*. `discord-api-types/v10` has separate `require`/`import` export conditions; inside the vitest workers pool it resolves to the CJS build (`v10.js`), where the runtime enums arrive as `undefined`. `aura.ts`, `duel.ts`, and `sens.ts` read `ApplicationCommandOptionType` at module scope for their option `type`, so importing `src/index.ts` throws `TypeError: Cannot read properties of undefined (reading 'User')` before any test runs. (`options.ts` reads the same enum, but inside a function body, so it only blows up when called.)
 
 This affects tests only, and **neither tsconfig catches it** — both `tsc` invocations pass, because the types resolve from `v10.d.ts` regardless of which runtime build gets loaded. `wrangler dev` and `wrangler deploy` bundle with esbuild, which takes the `import` condition (`v10.mjs`) and inlines the enum correctly — the dry-run build succeeds. Type-only imports are unaffected since they are erased. Fixing the suite means resolving that condition mismatch (or not evaluating the enum at module scope), not just refreshing the snapshots.
 
@@ -96,4 +96,4 @@ The root config includes `src/**/*.ts` + `scripts/**/*.ts` + `worker-configurati
 - `compatibility_flags: ["nodejs_compat"]` is on, so `node:*` imports are available.
 - `observability` and `upload_source_maps` are enabled — logs and stack traces are usable in the Cloudflare dashboard.
 - `wrangler.jsonc` ships with commented-out blocks for smart placement, vars, static assets, and service bindings; uncomment in place rather than re-deriving the syntax.
-- Formatting is nominally tabs / LF / single quotes / 140 columns (`.prettierrc`, `.editorconfig`), but the tree is inconsistent: `index.ts`, `ping.ts`, `types.ts`, `register.ts`, and the test file use tabs, while `aura.ts`, `duel.ts`, `errorHandling.ts`, and `math.ts` use 4 spaces. There is no format or lint script — match the surrounding file rather than reformatting it.
+- Formatting is nominally tabs / LF / single quotes / 140 columns (`.prettierrc`, `.editorconfig`), but the tree is inconsistent: `index.ts`, `ping.ts`, `types.ts`, `sens.ts`, `options.ts`, `register.ts`, and the test file use tabs, while `aura.ts`, `duel.ts`, `errorHandling.ts`, and `math.ts` use 4 spaces. There is no format or lint script — match the surrounding file rather than reformatting it.
