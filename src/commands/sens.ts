@@ -3,9 +3,14 @@ import {
 	ApplicationCommandOptionType,
 	InteractionResponseType,
 	type APIChatInputApplicationCommandInteraction,
-	type APIApplicationCommandInteractionDataUserOption,
 } from 'discord-api-types/v10';
 import { errorReply } from '../util/errorHandling';
+import { getStringOption } from '../util/options';
+
+const SENS_DATA: Record<string, string> = {
+    magik: 'Magik (Controller): 295 Horizontal 256 Vertical',
+    bucky: 'Bucky (Mouse & Keyboard): Horizontal - 1.1: Vertical - 1.1',
+};
 
 export const sens: Command = {
     developerOnly: true,
@@ -32,10 +37,29 @@ export const sens: Command = {
 		],
 	},
 	handler: async (interaction) => {
+        const i = interaction as APIChatInputApplicationCommandInteraction;
+        const character = getStringOption(i.data.options, 'character');
+
+        // Base path
+        if (!character) {
+            return {
+                type: InteractionResponseType.ChannelMessageWithSource,
+                data: {
+                    content: `All Heros - 262 Horizontal 212 Vertical. Different for some characters, use /sens [put ur hero here] (remove [ ]) for other sens`,
+                    allowed_mentions: { parse: [], users: [] },
+                }
+            }
+        }
+
+        if(!SENS_DATA[character]){
+            return errorReply(`No sens data found for ${character}.`);
+        }
+
+        // Money path
         return {
             type: InteractionResponseType.ChannelMessageWithSource,
             data: {
-                content: 'Not implemented yet.',
+                content: SENS_DATA[character],
                 allowed_mentions: { parse: [], users: [] },
             },
         };
