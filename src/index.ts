@@ -1,9 +1,4 @@
-import {
-	InteractionResponseType,
-	InteractionType,
-	MessageFlags,
-	type APIInteraction,
-} from 'discord-api-types/v10';
+import { InteractionResponseType, InteractionType, MessageFlags, type APIInteraction } from 'discord-api-types/v10';
 import { verifyKey } from 'discord-interactions';
 import { commandMap } from './commands/index';
 import { errorReply } from './util/errorHandling';
@@ -30,7 +25,6 @@ export default {
 
 		const interaction = JSON.parse(body) as APIInteraction;
 
-
 		if (interaction.type === InteractionType.Ping) {
 			return Response.json({ type: InteractionResponseType.Pong });
 		}
@@ -53,5 +47,5 @@ export default {
 		}
 
 		return new Response('Unhandled interaction type', { status: 400 });
-	}
+	},
 } satisfies ExportedHandler<Env>;

@@ -9,10 +9,6 @@ import type {
  */
 export interface Command {
 	definition: RESTPostAPIApplicationCommandsJSONBody;
-	handler: (
-		interaction: APIApplicationCommandInteraction,
-		env: Env,
-		ctx: ExecutionContext,
-	) => Promise<APIInteractionResponse>;
+	handler: (interaction: APIApplicationCommandInteraction, env: Env, ctx: ExecutionContext) => Promise<APIInteractionResponse>;
 	developerOnly?: boolean;
 }

@@ -1,4 +1,4 @@
-import { MessageFlags, type APIInteractionResponse, InteractionResponseType} from 'discord-api-types/v10';
+import { MessageFlags, type APIInteractionResponse, InteractionResponseType } from 'discord-api-types/v10';
 
 /**
  * Creates an ephemeral reply for an Interaction
@@ -6,6 +6,6 @@ import { MessageFlags, type APIInteractionResponse, InteractionResponseType} fro
  * @returns The Interaction response object
  */
 export const errorReply = (content: string): APIInteractionResponse => ({
-    type: InteractionResponseType.ChannelMessageWithSource,
-    data: { content, flags: MessageFlags.Ephemeral },
+	type: InteractionResponseType.ChannelMessageWithSource,
+	data: { content, flags: MessageFlags.Ephemeral },
 });

@@ -9,9 +9,9 @@
 	"compatibility_date": "2026-08-20",
 	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
-	"upload_source_maps": true
+	"upload_source_maps": true,
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
