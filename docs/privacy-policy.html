@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>kingbot &middot; Privacy Policy</title>
+  <style>
+    :root {
+      --bg: #fbfbfa;
+      --fg: #1c1c1a;
+      --muted: #6b6b66;
+      --rule: #e0dfda;
+      --link: #2f5d50;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #17181a;
+        --fg: #e8e8e4;
+        --muted: #9a9a94;
+        --rule: #2e3033;
+        --link: #7fb8a4;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 3rem 1.5rem 6rem;
+      background: var(--bg);
+      color: var(--fg);
+      font: 400 17px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    main {
+      max-width: 44rem;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 0.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 5vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.75rem;
+    }
+
+    .updated {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0 0 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    h2 {
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      margin: 2.75rem 0 0.75rem;
+    }
+
+    p,
+    li {
+      margin: 0 0 1rem;
+    }
+
+    ul {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    a:focus-visible {
+      outline: 2px solid var(--link);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 0 1.5rem;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.92rem;
+      min-width: 32rem;
+    }
+
+    th,
+    td {
+      text-align: left;
+      vertical-align: top;
+      padding: 0.7rem 1rem 0.7rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <p class="eyebrow">kingbot</p>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: [DATE]</p>
+
+    <p>This Privacy Policy explains what information <strong>kingbot</strong> (the &ldquo;Bot&rdquo;) receives, what it
+      stores, and what your options are. The Bot is operated by Noctis Systems, an independent project based in Vermont,
+      United States (&ldquo;we&rdquo;, &ldquo;us&rdquo;).</p>
+
+    <h2>1. How the Bot works</h2>
+    <p>The Bot uses Discord&rsquo;s HTTP interactions model. Discord sends us a signed request only when a user
+      explicitly invokes one of the Bot&rsquo;s slash commands. The Bot does not maintain a persistent Gateway
+      connection, which means it cannot and does not read general chat messages, direct messages, voice activity, or
+      member lists.</p>
+
+    <h2>2. Information we receive</h2>
+    <p>When you invoke a command, Discord includes the following in the interaction payload:</p>
+    <ul>
+      <li>Your Discord user ID, username, display name, and avatar hash</li>
+      <li>Your server nickname, roles, and permissions in that server</li>
+      <li>The server (guild) ID and channel ID where the command was used</li>
+      <li>The command name and any options you supplied, including text you typed and users you selected</li>
+      <li>An interaction ID and timestamp</li>
+    </ul>
+    <p>We receive this data because Discord sends it as part of the request. We do not request it separately, and we do
+      not use Privileged Gateway Intents.</p>
+
+    <h2>3. Information we store</h2>
+
+    <!--
+    CURRENTLY PUBLISHED: the "no storage" version below.
+    When custom commands and D1 ship, delete the two paragraphs immediately
+    following this comment and uncomment the block marked OPTION B further down.
+  -->
+    <p>We do not store any of the information described above. Interaction payloads are processed in memory to generate
+      a response and are then discarded. No database records are created.</p>
+    <p>Transient operational logs may briefly exist in our hosting provider&rsquo;s systems for error diagnosis. These
+      are not retained by us as a durable record.</p>
+
+    <!-- OPTION B, swap in once persistent storage ships:
+
+  <p>For features that require persistence, such as user created custom commands, we store:</p>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Purpose</th><th>Retention</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Discord server (guild) ID</td>
+        <td>Scope custom commands to the server that created them</td>
+        <td>Until the Bot is removed from the server or the data is deleted on request</td>
+      </tr>
+      <tr>
+        <td>Discord user ID of the creator</td>
+        <td>Attribute and permission edits to custom commands</td>
+        <td>Same as above</td>
+      </tr>
+      <tr>
+        <td>Custom command name and response text</td>
+        <td>Deliver the command when invoked</td>
+        <td>Same as above</td>
+      </tr>
+      <tr>
+        <td>Creation and modification timestamps</td>
+        <td>Moderation and troubleshooting</td>
+        <td>Same as above</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <p>We do not store message content beyond what you deliberately submit as a custom command response.</p>
+
+  -->
+
+    <h2>4. Why we process this data</h2>
+    <p>We process this data to operate the Bot&rsquo;s features, to respond to your commands, to prevent abuse, and to
+      fix errors. We do not use it for advertising, profiling, or sale.</p>
+
+    <h2>5. Where data is processed</h2>
+    <p>The Bot runs on <a href="https://www.cloudflare.com/privacy/">Cloudflare Workers</a>, which processes requests at
+      edge locations worldwide. Persistent data, where applicable, is stored in Cloudflare D1. Cloudflare acts as a data
+      processor on our behalf and is subject to its own privacy commitments.</p>
+
+    <h2>6. Sharing</h2>
+    <p>We do not sell, rent, or trade your data. We do not share it with third parties except:</p>
+    <ul>
+      <li>Discord, which necessarily receives the responses the Bot sends</li>
+      <li>Cloudflare, as our hosting and storage provider</li>
+      <li>Where required by law</li>
+    </ul>
+
+    <h2>7. Your choices and rights</h2>
+    <ul>
+      <li><strong>Stop sharing data:</strong> stop using the Bot&rsquo;s commands, or remove the Bot from your server.
+      </li>
+      <li><strong>Deletion:</strong> you can request deletion of any stored data associated with your Discord user ID or
+        your server by contacting us at <a href="mailto:contact@noctis-systems.com">contact@noctis-systems.com</a>.
+        Include your Discord user
+        ID or server ID so we can identify the records. We will respond within 30 days.</li>
+      <li><strong>Access:</strong> you can request a copy of any stored data associated with you using the same contact
+        method.</li>
+    </ul>
+    <p>Depending on where you live, you may have additional rights under laws such as the GDPR or CCPA, including the
+      right to object to processing or to lodge a complaint with a supervisory authority.</p>
+
+    <h2>8. Children</h2>
+    <p>The Bot is not directed at children under 13, or under the minimum age of digital consent in your country. We do
+      not knowingly collect data from such users. If you believe a child has provided data, contact us and we will
+      delete it.</p>
+
+    <h2>9. Security</h2>
+    <p>We take reasonable measures to protect stored data, including Discord request signature verification and storing
+      credentials as encrypted secrets rather than in source code. No system is perfectly secure, and we cannot
+      guarantee absolute security.</p>
+
+    <h2>10. Changes to this policy</h2>
+    <p>We may update this policy. The &ldquo;Last updated&rdquo; date above will change when we do. Material changes
+      will be noted in the Bot&rsquo;s GitHub repository when necessary.</p>
+
+    <h2>11. Contact</h2>
+    <p>Privacy questions and deletion requests can be sent to <a
+        href="mailto:contact@noctis-systems.com">contact@noctis-systems.com</a>.</p>
+
+    <footer>
+      <p>See also the <a href="/terms">Terms of Service</a>.</p>
+    </footer>
+  </main>
+</body>
+
+</html>
