@@ -6,7 +6,6 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "start": "wrangler dev",
-    "test": "vitest",
     "cf-typegen": "wrangler types",
     "register:guild": "tsx --env-file=.env scripts/register.ts guild",
     "register:global": "tsx --env-file=.env scripts/register.ts global",
@@ -14,11 +13,9 @@
     "register:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.22.0",
     "@types/node": "^26.2.0",
     "tsx": "^4.23.12",
     "typescript": "^5.5.2",
-    "vitest": "~4.1.0",
     "wrangler": "^4.125.0"
   },
   "dependencies": {
