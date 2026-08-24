@@ -18,7 +18,7 @@ type SensProfile = {
 const SENS_PROFILES: SensProfile[] = [
 	{ name: 'Magik',            value: 'magik',         input: 'Controller',        horizontal: '295',      vertical: '256' },
 	{ name: 'Bucky',            value: 'bucky',         input: 'Mouse & Keyboard',  horizontal: '1.1',      vertical: '1.1' },
-	{ name: 'Daredevil',        value: 'daredevil',     input: 'Controller',        horizontal: '440',      vertical: '400' },
+	{ name: 'Daredevil',        value: 'daredevil',     input: 'Mouse & Keyboard',  horizontal: '1.4',      vertical: '1.4' },
 	{ name: 'Deadpool',         value: 'deadpool',      input: 'Mouse & Keyboard',  horizontal: '1.2',      vertical: '1.2' },
 	{ name: 'Elsa',             value: 'elsa',          input: 'Mouse & Keyboard',  horizontal: '2.30',     vertical: '2.30' },
 	{ name: 'Hela',             value: 'hela',          input: 'Controller',        horizontal: '154',      vertical: '114' },
@@ -30,6 +30,8 @@ const SENS_PROFILES: SensProfile[] = [
 	{ name: 'Winter Soldier',   value: 'wintersoldier', input: 'Mouse & Keyboard',  horizontal: '1.1',      vertical: '1.1' },
 	{ name: 'Wolverine',        value: 'wolverine',     input: 'Mouse & Keyboard',  horizontal: '2.0',      vertical: '2.0' },
 	{ name: 'All Heros',        value: 'all',           input: 'Controller',        horizontal: '262',      vertical: '212' },
+	{ name: 'Black Cat',		value: 'blackcat',	  	input: 'Mouse & Keyboard',  horizontal: '1.4',      vertical: '1.4' },
+	{ name: 'Venom',			value: 'venom',		  	input: 'Mouse & Keyboard',  horizontal: '1.2',      vertical: '1.2' },
 ];
 
 const SENS_MAP = new Map<string, SensProfile>(SENS_PROFILES.map((p) => [p.value, p]));
