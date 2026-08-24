@@ -3,10 +3,21 @@ import { verifyKey } from 'discord-interactions';
 import { commandMap } from './commands/index';
 import { errorReply } from './util/errorHandling';
 
+type RouteHandler = (request: Request, env: Env, ctx: ExecutionContext) => Promise<Response> | Response;
+
+const routes: Record<string, RouteHandler> = {
+	'/health': () => new Response('OK', { status: 200 }),
+	'/legal/terms-of-service': () => fetch('https://kingbot-c36.pages.dev/terms-of-service'),
+	'/legal/privacy-policy': () => fetch('https://kingbot-c36.pages.dev/privacy-policy'),
+};
+
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-		if (request.method !== 'POST') {
-			return new Response('Kingbot is running!');
+		const url = new URL(request.url);
+
+		if (request.method === 'GET') {
+			const handler = routes[url.pathname];
+			if (handler) return handler(request, env, ctx);
 		}
 
 		const signature = request.headers.get('x-signature-ed25519');
