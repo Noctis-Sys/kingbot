@@ -1,25 +1,29 @@
 {
-  "name": "kingbot",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types",
-    "register:guild": "tsx --env-file=.env scripts/register.ts guild",
-    "register:global": "tsx --env-file=.env scripts/register.ts global",
-    "register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
-    "register:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
-  },
-  "devDependencies": {
-    "@types/node": "^26.2.0",
-    "tsx": "^4.23.12",
-    "typescript": "^5.5.2",
-    "wrangler": "^4.125.0"
-  },
-  "dependencies": {
-    "discord-api-types": "^0.38.53",
-    "discord-interactions": "^4.4.0"
-  }
+	"name": "kingbot",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"cf-typegen": "wrangler types",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"typecheck": "tsc --noEmit",
+		"register:guild": "tsx --env-file=.env scripts/register.ts guild",
+		"register:global": "tsx --env-file=.env scripts/register.ts global",
+		"register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
+		"register:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
+	},
+	"devDependencies": {
+		"@types/node": "^26.2.0",
+		"prettier": "3.9.6",
+		"tsx": "^4.23.12",
+		"typescript": "^5.5.2",
+		"wrangler": "^4.125.0"
+	},
+	"dependencies": {
+		"discord-api-types": "^0.38.53",
+		"discord-interactions": "^4.4.0"
+	}
 }
