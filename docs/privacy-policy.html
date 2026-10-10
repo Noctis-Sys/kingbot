@@ -138,7 +138,7 @@
   <main>
     <p class="eyebrow">kingbot</p>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: 08/24/2026</p>
+    <p class="updated">Last updated: 10/09/2026</p>
 
     <p>This Privacy Policy explains what information <strong>kingbot</strong> (the &ldquo;Bot&rdquo;) receives, what it
       stores, and what your options are. The Bot is operated by Noctis Systems, an independent project based in Vermont,
@@ -164,51 +164,39 @@
 
     <h2>3. Information we store</h2>
 
-    <!--
-    CURRENTLY PUBLISHED: the "no storage" version below.
-    When custom commands and D1 ship, delete the two paragraphs immediately
-    following this comment and uncomment the block marked OPTION B further down.
-  -->
-    <p>We do not store any of the information described above. Interaction payloads are processed in memory to generate
-      a response and are then discarded. No database records are created.</p>
+    <p>Most commands store nothing: the interaction payload is processed in memory to generate a response and is then
+      discarded. The exception is <code>/charge</code>, which keeps a running count. We store:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Purpose</th>
+            <th>Retention</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Your Discord user ID and the number of times you have used <code>/charge</code></td>
+            <td>Show your rank on the charge leaderboard</td>
+            <td>Until you request deletion, or the Bot is discontinued</td>
+          </tr>
+          <tr>
+            <td>The total number of charges across all users</td>
+            <td>Show the charge number on each <code>/charge</code> and on the leaderboard</td>
+            <td>Same as above. This is a single number and is not linked to any user.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>A record is created the first time you use <code>/charge</code>. Using other commands, or viewing the leaderboard
+      with <code>/chargeleaderboard</code>, does not create one. We do not store your username, display name, avatar,
+      server ID, channel ID, or any message content.</p>
+    <p><strong>The charge leaderboard is public.</strong> If you are among the top chargers, your Discord account and
+      charge count are shown to anyone who runs <code>/chargeleaderboard</code>, in any server where the Bot is
+      installed. Counts are kept per user, not per server, so the leaderboard covers every server.</p>
     <p>Transient operational logs may briefly exist in our hosting provider&rsquo;s systems for error diagnosis. These
       are not retained by us as a durable record.</p>
-
-    <!-- OPTION B, swap in once persistent storage ships:
-
-  <p>For features that require persistence, such as user created custom commands, we store:</p>
-  <div class="table-wrap">
-  <table>
-    <thead>
-      <tr><th>Data</th><th>Purpose</th><th>Retention</th></tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Discord server (guild) ID</td>
-        <td>Scope custom commands to the server that created them</td>
-        <td>Until the Bot is removed from the server or the data is deleted on request</td>
-      </tr>
-      <tr>
-        <td>Discord user ID of the creator</td>
-        <td>Attribute and permission edits to custom commands</td>
-        <td>Same as above</td>
-      </tr>
-      <tr>
-        <td>Custom command name and response text</td>
-        <td>Deliver the command when invoked</td>
-        <td>Same as above</td>
-      </tr>
-      <tr>
-        <td>Creation and modification timestamps</td>
-        <td>Moderation and troubleshooting</td>
-        <td>Same as above</td>
-      </tr>
-    </tbody>
-  </table>
-  </div>
-  <p>We do not store message content beyond what you deliberately submit as a custom command response.</p>
-
-  -->
 
     <h2>4. Why we process this data</h2>
     <p>We process this data to operate the Bot&rsquo;s features, to respond to your commands, to prevent abuse, and to
@@ -216,7 +204,7 @@
 
     <h2>5. Where data is processed</h2>
     <p>The Bot runs on <a href="https://www.cloudflare.com/privacy/">Cloudflare Workers</a>, which processes requests at
-      edge locations worldwide. Persistent data, where applicable, is stored in Cloudflare D1. Cloudflare acts as a data
+      edge locations worldwide. Stored data, described in section 3, is kept in Cloudflare D1. Cloudflare acts as a data
       processor on our behalf and is subject to its own privacy commitments.</p>
 
     <h2>6. Sharing</h2>
@@ -234,7 +222,8 @@
       <li><strong>Deletion:</strong> you can request deletion of any stored data associated with your Discord user ID or
         your server by contacting us at <a href="mailto:contact@noctis-systems.com">contact@noctis-systems.com</a>.
         Include your Discord user
-        ID or server ID so we can identify the records. We will respond within 30 days.</li>
+        ID or server ID so we can identify the records. We will respond within 30 days. Deleting your charge count
+        removes you from the leaderboard; the overall charge total is not reduced, since it is not linked to you.</li>
       <li><strong>Access:</strong> you can request a copy of any stored data associated with you using the same contact
         method.</li>
     </ul>
