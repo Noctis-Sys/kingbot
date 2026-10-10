@@ -39,7 +39,7 @@ There is **no test suite** — no `npm test`, nothing under `test/`. `npm run ty
 
 **`sens` is data-driven, with two limits.** `SENS_PROFILES` (`src/commands/sens.ts`) is the single source for three things at once: the `choices` list on the registered option, the `SENS_MAP` lookup, and the reply text via `formatSens`. Adding a character means adding one row — but (a) Discord caps an option's `choices` at **25** and the list is at 16, so past that the registration PUT starts failing rather than the deploy; and (b) the row with `value: 'all'` is load-bearing, since a bare `/sens` resolves `SENS_MAP.get(character ?? 'all')` — delete it and the no-argument path falls to `errorReply`. Re-run `npm run register:*` after any profile edit; the choice list lives in the definition, so a deploy alone will not update it.
 
-**Shared helpers live in `src/util/`.** Besides `errorHandling.ts`: `math.ts` exports `randInt(min, max)` (inclusive on both ends), used by `aura` and `duel` for their rolls; `options.ts` exports `getStringOption(options, name)`, returning a `String` option value or `undefined`. There is no user-option equivalent — `aura` and `duel` each still hand-roll that lookup.
+**Shared helpers live in `src/util/`.** Besides `errorHandling.ts`: `math.ts` exports `randInt(min, max)` (inclusive on both ends), used by `aura` and `duel` for their rolls; `options.ts` exports `getStringOption(options, name)` and `getBooleanOption(options, name)`, returning that option's value or `undefined`. There is no user-option equivalent — `aura` and `duel` each still hand-roll that lookup.
 
 ## Shipping a command (two independent steps)
 
@@ -63,7 +63,7 @@ Each scope is one entry in the `scopeHandlers` record, returning the `{ url, pay
 
 ## D1
 
-`kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Schema lives in `migrations/` as numbered `.sql` files; queries live in `src/db/` (`recordCharge` in `charges.ts` upserts `user_charges` and bumps the `'charge'` row in `counters` in one `batch`, which D1 runs as a transaction).
+`kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Schema lives in `migrations/` as numbered `.sql` files; queries live in `src/db/` (`recordCharge` in `charges.ts` upserts `user_charges` and bumps the `'charge'` row in `counters` in one `batch`, which D1 runs as a transaction; `getChargeLeaderboard` reads the top N plus the total). `/charge leaderboard:True` shows the leaderboard instead of charging, so it writes nothing. Counts are per user across every server, so the leaderboard can list users from other servers, who render as unknown `<@id>` mentions.
 
 **Migrations are not applied by the push-to-deploy build.** Apply them yourself — `npx wrangler d1 migrations apply DB --remote` — _before_ pushing code that depends on them, and `--local` for `wrangler dev`.
 

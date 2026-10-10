@@ -13,3 +13,22 @@ export async function recordCharge(db: D1Database, userId: string): Promise<numb
 	]);
 	return total.results[0].count;
 }
+
+export interface ChargeLeaderboard {
+	top: { user_id: string; count: number }[];
+	total: number;
+}
+
+/**
+ * The `limit` users with the most charges, highest first, plus the global charge total.
+ */
+export async function getChargeLeaderboard(db: D1Database, limit: number): Promise<ChargeLeaderboard> {
+	const [top, total] = await db.batch([
+		db.prepare('SELECT user_id, count FROM user_charges ORDER BY count DESC, user_id LIMIT ?').bind(limit),
+		db.prepare("SELECT count FROM counters WHERE name = 'charge'"),
+	]);
+	return {
+		top: top.results as ChargeLeaderboard['top'],
+		total: (total.results[0] as { count: number } | undefined)?.count ?? 0,
+	};
+}
