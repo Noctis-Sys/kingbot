@@ -12,6 +12,13 @@
 		"enabled": true,
 	},
 	"upload_source_maps": true,
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "kingbot-db",
+			"database_id": "b3fac634-db9a-4dc0-91d2-0a85429d71a2",
+		},
+	],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

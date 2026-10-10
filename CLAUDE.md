@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`kingbot` — a Discord bot that runs as a Cloudflare Worker. It is an _interaction webhook_, not a gateway bot: Discord POSTs slash-command interactions to the Worker's public URL and the Worker replies synchronously in the HTTP response. There is no persistent connection, no bindings, and no state — every command is a pure function of its interaction payload.
+`kingbot` — a Discord bot that runs as a Cloudflare Worker. It is an _interaction webhook_, not a gateway bot: Discord POSTs slash-command interactions to the Worker's public URL and the Worker replies synchronously in the HTTP response. There is no persistent connection. The one piece of state is a D1 database (binding `DB`) holding `/charge` counts — see _D1_ below; every other command is a pure function of its interaction payload.
 
 `AGENTS.md` holds the Cloudflare-specific guidance (docs links, error codes, product references). Read it before any Workers/KV/R2/D1/Durable Objects/Queues work rather than relying on recalled API knowledge.
 
@@ -29,9 +29,9 @@ There is **no test suite** — no `npm test`, nothing under `test/`. `npm run ty
 
 **One handler, one dispatch table.** `src/index.ts` is the whole request pipeline: non-POST returns the liveness string `"Kingbot is running!"`; POST verifies the Ed25519 signature with `verifyKey` against `env.DISCORD_PUBLIC_KEY` (401 on a missing or bad signature), answers `InteractionType.Ping` with a Pong, then looks the command up in `commandMap`. An unknown name returns an ephemeral `"Unknown command"` reply; anything that is not `ApplicationCommand` falls through to a 400. The raw body must be read as text _before_ parsing — `verifyKey` signs the exact bytes, so never `request.json()` first.
 
-**`src/commands/index.ts` is the single registration point.** The `commands` array there (currently `[ping, duel, aura, sens]`) feeds two consumers: `commandMap` (keyed on `definition.name`, used for runtime dispatch) and `scripts/register.ts` (the definitions PUT to Discord). Adding a command means creating the module and appending it to that array — nothing else discovers commands.
+**`src/commands/index.ts` is the single registration point.** The `commands` array there (currently `[ping, duel, aura, sens, charge]`) feeds two consumers: `commandMap` (keyed on `definition.name`, used for runtime dispatch) and `scripts/register.ts` (the definitions PUT to Discord). Adding a command means creating the module and appending it to that array — nothing else discovers commands.
 
-**The `Command` interface (`src/commands/types.ts`)** pairs a `definition` (`RESTPostAPIApplicationCommandsJSONBody`, what Discord registers) with a `handler` returning a `Promise<APIInteractionResponse>`. Handlers are called with `(interaction, env, ctx)` — no current command uses `env` or `ctx`, but they are threaded through and are the seam for anything needing secrets or `waitUntil`. Handlers receive the broad `APIApplicationCommandInteraction`; existing commands narrow it with a local `const i = interaction as APIChatInputApplicationCommandInteraction` before touching `i.data.options`. An optional `developerOnly: true` (currently on `ping`) holds the command back from global registration; it is a _registration-time_ filter only — `commandMap` still dispatches it wherever it is already registered.
+**The `Command` interface (`src/commands/types.ts`)** pairs a `definition` (`RESTPostAPIApplicationCommandsJSONBody`, what Discord registers) with a `handler` returning a `Promise<APIInteractionResponse>`. Handlers are called with `(interaction, env, ctx)` — only `charge` uses `env` (for `env.DB`); nothing uses `ctx` yet, but it is the seam for `waitUntil`. Handlers receive the broad `APIApplicationCommandInteraction`; existing commands narrow it with a local `const i = interaction as APIChatInputApplicationCommandInteraction` before touching `i.data.options`. An optional `developerOnly: true` (currently on `ping`) holds the command back from global registration; it is a _registration-time_ filter only — `commandMap` still dispatches it wherever it is already registered.
 
 **Interaction payload idioms.** The invoker is `interaction.member?.user ?? interaction.user` — `member` in a guild, `user` in DMs, so both must be checked. Option values for user options are _IDs_; the user object comes from `i.data.resolved.users[option.value]`. Options are found by matching both `name` and `type` — `aura`/`duel` inline a type predicate for their `User` option, while `sens` goes through `getStringOption` (`src/util/options.ts`) for its `String` one. A `String` option with a `choices` list still needs its value re-checked at runtime: `sens` looks the choice up in a `Map` and falls back to `errorReply` when it misses. Every message that mentions a user sets `allowed_mentions: { parse: [], users: [] }` so the bot renders `<@id>` without pinging.
 
@@ -60,6 +60,14 @@ Deploying the Worker does **not** tell Discord the command exists. After changin
 Each scope is one entry in the `scopeHandlers` record, returning the `{ url, payload, summary }` for that scope — plus an optional `confirm` prompt, which is what marks a scope destructive enough to ask first. Adding a scope means adding it to `SCOPES` _and_ to that record — the `Record<Scope, …>` type makes a missing handler a compile error.
 
 `scripts/register.ts` runs in **Node**, not workerd (`tsx --env-file=.env`), which is why it reads `process.env` and why `scripts/` is in the root tsconfig's `include`. It imports `src/commands/index` for real, so every command module is evaluated under Node at registration time: keep module scope free of workerd-only globals, or `register:*` breaks even though the Worker deploys fine. (The `discord-api-types` runtime enums do resolve correctly under `tsx` — verified.)
+
+## D1
+
+`kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Schema lives in `migrations/` as numbered `.sql` files; queries live in `src/db/` (`recordCharge` in `charges.ts` upserts `user_charges` and bumps the `'charge'` row in `counters` in one `batch`, which D1 runs as a transaction).
+
+**Migrations are not applied by the push-to-deploy build.** Apply them yourself — `npx wrangler d1 migrations apply DB --remote` — _before_ pushing code that depends on them, and `--local` for `wrangler dev`.
+
+The account is on the Workers Free plan: 100,000 D1 row writes/day, and since 2026-09-01 queries **fail** once a daily limit is hit (until midnight UTC). A charge costs 2 row writes, and every index on a written column adds one more — which is why `user_charges.count` is unindexed. `charge` catches a failed `recordCharge` and still replies, just without the footer count; keep new D1 calls on that same degrade-don't-fail path.
 
 ## Secrets
 

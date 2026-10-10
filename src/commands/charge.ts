@@ -8,6 +8,7 @@ import {
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
+import { recordCharge } from '../db/charges';
 
 // Must be a direct link to the .gif file — embeds don't render a GIF from a page URL.
 const CHARGE_GIF_URL = 'https://static2.klipy.com/ii/35ccce3d852f7995dd2da910f2abd795/d4/e3/3tK93Eif.gif';
@@ -34,10 +35,18 @@ export const charge: Command = {
 		name: 'charge',
 		description: 'CHARGE!',
 	},
-	handler: async (interaction) => {
+	handler: async (interaction, env) => {
 		const invoker = interaction.member?.user ?? interaction.user;
 		if (!invoker) {
 			return errorReply('Could not identify who invoked this command.');
+		}
+
+		// A failed count (e.g. the D1 free-tier daily limit) shouldn't stop the charge — it just goes out without a footer.
+		let total: number | undefined;
+		try {
+			total = await recordCharge(env.DB, invoker.id);
+		} catch (error) {
+			console.error('[charge] Failed to record charge:', error);
 		}
 
 		const name = interaction.member?.nick ?? invoker.global_name ?? invoker.username;
@@ -49,6 +58,7 @@ export const charge: Command = {
 						color: CHARGE_COLOR,
 						author: { name: `${name} is charging!`, icon_url: avatarUrl(invoker) },
 						image: { url: CHARGE_GIF_URL },
+						footer: total === undefined ? undefined : { text: `Charge #${total.toLocaleString('en-US')}` },
 					},
 				],
 			},
