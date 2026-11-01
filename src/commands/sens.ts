@@ -2,10 +2,12 @@ import {
 	ApplicationCommandOptionType,
 	InteractionResponseType,
 	type APIChatInputApplicationCommandInteraction,
+	type APIApplicationCommandAutocompleteInteraction,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
-import { getStringOption } from '../util/options';
+import { getStringOption, getAutocompleteOption } from '../util/options';
+import { getRosterData } from '../db/query';
 
 type SensProfile = {
 	name: string;
@@ -69,11 +71,27 @@ export const sens: Command = {
 			},
 		};
 	},
-	autocomplete: async (interaction) => {
+	autocomplete: async (interaction, env) => {
+		let roster;
+		const i = interaction as APIApplicationCommandAutocompleteInteraction;
+		const query = getAutocompleteOption(i.data.options);
+		try {
+			roster = await getRosterData(env.DB, query);
+			console.log(roster);
+		} catch (error) {
+			console.error('[sens] Failed to load roster data:', error);
+			return {
+				type: InteractionResponseType.ApplicationCommandAutocompleteResult,
+				data: {
+					choices: [],
+				},
+			};
+		}
+		console.log(roster.characters.map((p) => ({ name: p.name, value: p.slug })));
 		return {
 			type: InteractionResponseType.ApplicationCommandAutocompleteResult,
 			data: {
-				choices: SENS_PROFILES.map((p) => ({ name: p.name, value: p.value })),
+				choices: roster.characters.map((p) => ({ name: p.name, value: p.slug })),
 			},
 		};
 	},
