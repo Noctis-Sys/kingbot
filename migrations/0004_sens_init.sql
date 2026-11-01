@@ -1,4 +1,4 @@
--- Seed the data for marvel rivals hero roster & sensitivity data
+-- Seed the data for marvel rivals hero roster
 INSERT INTO
 	hero_roster (slug, name)
 VALUES
@@ -57,6 +57,7 @@ VALUES
 	('ultron', 'Ultron'),
 	('white_fox', 'White Fox');
 
+-- Seed the values for sens data known at this time
 INSERT INTO
 	sens_data (slug, type, x_axis, y_axis)
 VALUES
@@ -65,10 +66,20 @@ VALUES
 	('psylocke', 'Controller', '256', '216'),
 	('the_punisher', 'Controller', '256', '216'),
 	('spider_man', 'Controller', '261', '301'),
-	('winter_soldier', 'Mouse & Keyboard', '1.1', '1.1'),
+	(
+		'winter_soldier',
+		'Mouse & Keyboard',
+		'1.1',
+		'1.1'
+	),
 	('daredevil', 'Mouse & Keyboard', '1.4', '1.4'),
 	('deadpool', 'Mouse & Keyboard', '1.2', '1.2'),
-	('elsa_bloodstone', 'Mouse & Keyboard', '2.30', '2.30'),
+	(
+		'elsa_bloodstone',
+		'Mouse & Keyboard',
+		'2.30',
+		'2.30'
+	),
 	('luna_snow', 'Mouse & Keyboard', '0.95', '0.95'),
 	('magneto', 'Mouse & Keyboard', '1.2', '1.2'),
 	('wolverine', 'Mouse & Keyboard', '2.0', '2.0'),
