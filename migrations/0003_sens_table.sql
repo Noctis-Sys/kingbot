@@ -1,9 +1,15 @@
 -- Create the table for storing sensitivity data
-PRAGMA foreign_keys = ON
 CREATE TABLE sens_data (
 	slug TEXT PRIMARY KEY NOT NULL,
-	FOREIGN KEY (slug) REFERENCES hero_roster(slug) ON DELETE RESTRICT
 	type TEXT NOT NULL CHECK (type IN ('Controller', 'Mouse & Keyboard')),
+	x_axis TEXT NOT NULL,
+	y_axis TEXT NOT NULL,
+	FOREIGN KEY (slug) REFERENCES hero_roster (slug) ON DELETE RESTRICT
+);
+
+-- Create a table for the global (All heros) sens; used as a default for heros with a missing profile
+CREATE TABLE global_sens_data (
+	type TEXT PRIMARY KEY NOT NULL CHECK (type IN ('Controller', 'Mouse & Keyboard')),
 	x_axis TEXT NOT NULL,
 	y_axis TEXT NOT NULL
 );
