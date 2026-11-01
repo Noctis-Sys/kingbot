@@ -2,6 +2,8 @@ import type {
 	APIApplicationCommandInteraction,
 	APIInteractionResponse,
 	RESTPostAPIApplicationCommandsJSONBody,
+	APIApplicationCommandAutocompleteInteraction,
+	APIApplicationCommandAutocompleteResponse,
 } from 'discord-api-types/v10';
 
 /**
@@ -11,4 +13,9 @@ export interface Command {
 	definition: RESTPostAPIApplicationCommandsJSONBody;
 	handler: (interaction: APIApplicationCommandInteraction, env: Env, ctx: ExecutionContext) => Promise<APIInteractionResponse>;
 	developerOnly?: boolean;
+	autocomplete?: (
+		interaction: APIApplicationCommandAutocompleteInteraction,
+		env: Env,
+		ctx: ExecutionContext,
+	) => Promise<APIApplicationCommandAutocompleteResponse>;
 }

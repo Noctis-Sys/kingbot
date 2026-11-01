@@ -57,6 +57,26 @@ export default {
 			}
 		}
 
+		if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
+			try {
+				const command = commandMap.get(interaction.data.name);
+				if (!command || !command.autocomplete) {
+					console.log(`[${interaction.data.name}] Unknown command or autocomplete not implemented`);
+					return Response.json({
+						type: InteractionResponseType.ApplicationCommandAutocompleteResult,
+						data: { choices: [] },
+					});
+				}
+				return Response.json(await command.autocomplete(interaction, env, ctx));
+			} catch (error) {
+				console.error(`[${interaction.data.name}] Error handling autocomplete:`, error);
+				return Response.json({
+					type: InteractionResponseType.ApplicationCommandAutocompleteResult,
+					data: { choices: [] },
+				});
+			}
+		}
+
 		return new Response('Unhandled interaction type', { status: 400 });
 	},
 } satisfies ExportedHandler<Env>;

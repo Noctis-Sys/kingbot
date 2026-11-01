@@ -1,9 +1,9 @@
-import type { Command } from './types';
 import {
 	ApplicationCommandOptionType,
 	InteractionResponseType,
 	type APIChatInputApplicationCommandInteraction,
 } from 'discord-api-types/v10';
+import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
 import { getStringOption } from '../util/options';
 
@@ -66,6 +66,14 @@ export const sens: Command = {
 			data: {
 				content: formatSens(profile),
 				allowed_mentions: { parse: [], users: [] },
+			},
+		};
+	},
+	autocomplete: async (interaction) => {
+		return {
+			type: InteractionResponseType.ApplicationCommandAutocompleteResult,
+			data: {
+				choices: SENS_PROFILES.map((p) => ({ name: p.name, value: p.value })),
 			},
 		};
 	},
