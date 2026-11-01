@@ -7,38 +7,7 @@ import {
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
-import { getRosterData } from '../db/query';
-
-type SensProfile = {
-	name: string;
-	value: string;
-	input: 'Controller' | 'Mouse & Keyboard' | 'N/A';
-	horizontal: string;
-	vertical: string;
-};
-
-const SENS_PROFILES: SensProfile[] = [
-	{ name: 'Magik', value: 'magik', input: 'Controller', horizontal: '295', vertical: '256' },
-	{ name: 'Bucky', value: 'bucky', input: 'Mouse & Keyboard', horizontal: '1.1', vertical: '1.1' },
-	{ name: 'Daredevil', value: 'daredevil', input: 'Mouse & Keyboard', horizontal: '1.4', vertical: '1.4' },
-	{ name: 'Deadpool', value: 'deadpool', input: 'Mouse & Keyboard', horizontal: '1.2', vertical: '1.2' },
-	{ name: 'Elsa', value: 'elsa', input: 'Mouse & Keyboard', horizontal: '2.30', vertical: '2.30' },
-	{ name: 'Hela', value: 'hela', input: 'Controller', horizontal: '154', vertical: '114' },
-	{ name: 'Luna', value: 'luna', input: 'Mouse & Keyboard', horizontal: '0.95', vertical: '0.95' },
-	{ name: 'Magneto', value: 'magneto', input: 'Mouse & Keyboard', horizontal: '1.2', vertical: '1.2' },
-	{ name: 'Psylocke', value: 'psylocke', input: 'Controller', horizontal: '256', vertical: '216' },
-	{ name: 'Punisher', value: 'punisher', input: 'Controller', horizontal: '256', vertical: '216' },
-	{ name: 'Spiderman', value: 'spiderman', input: 'Controller', horizontal: '261', vertical: '301' },
-	{ name: 'Winter Soldier', value: 'wintersoldier', input: 'Mouse & Keyboard', horizontal: '1.1', vertical: '1.1' },
-	{ name: 'Wolverine', value: 'wolverine', input: 'Mouse & Keyboard', horizontal: '2.0', vertical: '2.0' },
-	{ name: 'All Heros', value: 'all', input: 'Controller', horizontal: '262', vertical: '212' },
-	{ name: 'Black Cat', value: 'blackcat', input: 'Mouse & Keyboard', horizontal: '1.4', vertical: '1.4' },
-	{ name: 'Venom', value: 'venom', input: 'Mouse & Keyboard', horizontal: '1.2', vertical: '1.2' },
-];
-
-const SENS_MAP = new Map<string, SensProfile>(SENS_PROFILES.map((p) => [p.value, p]));
-
-const formatSens = (p: SensProfile) => `${p.name} Sens:\nInput: ${p.input}\nHorizontal: ${p.horizontal}\nVertical: ${p.vertical}`;
+import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 
 export const sens: Command = {
 	developerOnly: false,
@@ -55,18 +24,46 @@ export const sens: Command = {
 			},
 		],
 	},
-	handler: async (interaction) => {
+	handler: async (interaction, env) => {
 		const i = interaction as APIChatInputApplicationCommandInteraction;
-		const character = getStringOption(i.data.options, 'character');
-
-		const profile = SENS_MAP.get(character ?? 'all');
-		if (!profile) {
-			return errorReply(`No character found matching '${character}'. Pick from one of the suggestions.`);
+		const query = getStringOption(i.data.options, 'character');
+		let sensProfiles;
+		try {
+			if (!query) {
+				sensProfiles = await getGlobalSensProfile(env.DB);
+			} else {
+				sensProfiles = await getSensProfile(env.DB, query);
+			}
+		} catch (error) {
+			console.error('[sens] Failed to load sens profiles:', error);
+			return errorReply('Failed to load sens profiles. Please try again later.');
 		}
+
+		if (sensProfiles.length === 0) {
+			return errorReply(`No sens profiles found for character: ${query ?? 'All Heroes'}`);
+		}
+
+		let embedDescription = '';
+
+		if (sensProfiles[0].type === null) {
+			embedDescription = 'No sens data available for this character.';
+		} else {
+			for (const profile of sensProfiles) {
+				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';
+				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}\n\n`;
+			}
+		}
+
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				content: formatSens(profile),
+				embeds: [
+					{
+						color: 0x00ff00,
+						title: `Sens for ${sensProfiles[0].name}`,
+						description: embedDescription,
+					},
+				],
 				allowed_mentions: { parse: [], users: [] },
 			},
 		};
@@ -77,7 +74,6 @@ export const sens: Command = {
 		const query = getAutocompleteOption(i.data.options);
 		try {
 			roster = await getRosterData(env.DB, query);
-			console.log(roster);
 		} catch (error) {
 			console.error('[sens] Failed to load roster data:', error);
 			return {
@@ -87,11 +83,10 @@ export const sens: Command = {
 				},
 			};
 		}
-		console.log(roster.characters.map((p) => ({ name: p.name, value: p.slug })));
 		return {
 			type: InteractionResponseType.ApplicationCommandAutocompleteResult,
 			data: {
-				choices: roster.characters.map((p) => ({ name: p.name, value: p.slug })),
+				choices: roster.map((p) => ({ name: p.name, value: p.slug })),
 			},
 		};
 	},

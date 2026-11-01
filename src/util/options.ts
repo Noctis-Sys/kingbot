@@ -8,6 +8,5 @@ export function getStringOption(options: APIApplicationCommandInteractionDataOpt
 export function getAutocompleteOption(options: APIApplicationCommandInteractionDataOption[]): string {
 	const focused = options.find((o) => o.type === ApplicationCommandOptionType.String && o.focused);
 	const query = focused?.type === ApplicationCommandOptionType.String ? focused.value : '';
-	console.log(`Autocomplete query: ${query}`);
 	return query;
 }
