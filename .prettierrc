@@ -2,5 +2,15 @@
 	"printWidth": 140,
 	"singleQuote": true,
 	"semi": true,
-	"useTabs": true
+	"useTabs": true,
+	"plugins": ["prettier-plugin-sql"],
+	"overrides": [
+		{
+			"files": "*.sql",
+			"options": {
+				"language": "sqlite",
+				"keywordCase": "upper"
+			}
+		}
+	]
 }
