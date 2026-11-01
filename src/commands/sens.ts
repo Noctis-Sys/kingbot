@@ -49,7 +49,7 @@ export const sens: Command = {
 				name: 'character',
 				description: 'The character to get sens for',
 				required: false,
-				choices: SENS_PROFILES.map((p) => ({ name: p.name, value: p.value })),
+				autocomplete: true,
 			},
 		],
 	},
