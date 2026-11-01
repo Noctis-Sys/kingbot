@@ -59,7 +59,7 @@ export const sens: Command = {
 
 		const profile = SENS_MAP.get(character ?? 'all');
 		if (!profile) {
-			return errorReply('Invalid character specified. Please choose a valid character from the list.');
+			return errorReply(`No character found matching '${character}'. Pick from one of the suggestions.`);
 		}
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
