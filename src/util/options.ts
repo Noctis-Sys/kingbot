@@ -2,11 +2,11 @@ import { ApplicationCommandOptionType, type APIApplicationCommandInteractionData
 
 export function getStringOption(options: APIApplicationCommandInteractionDataOption[] | undefined, name: string): string | undefined {
 	const option = options?.find((o) => o.name === name && o.type === ApplicationCommandOptionType.String);
-	return option?.type === ApplicationCommandOptionType.String ? option.value : undefined;
+	return option?.type === ApplicationCommandOptionType.String ? option.value.trim() : undefined;
 }
 
 export function getAutocompleteOption(options: APIApplicationCommandInteractionDataOption[]): string {
 	const focused = options.find((o) => o.type === ApplicationCommandOptionType.String && o.focused);
-	const query = focused?.type === ApplicationCommandOptionType.String ? focused.value : '';
+	const query = focused?.type === ApplicationCommandOptionType.String ? focused.value.trim() : '';
 	return query;
 }

@@ -22,16 +22,17 @@ export async function getRosterData(db: D1Database, search: string): Promise<Ros
 	return results;
 }
 
-export async function getSensProfile(db: D1Database, slug: string): Promise<SensProfile[]> {
+// `search` is a slug when a suggestion was picked, or a typed hero name (any case) when it wasn't.
+export async function getSensProfile(db: D1Database, search: string): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
 			`SELECT r.name, s.type, s.x_axis, s.y_axis, s.updated_at
              FROM hero_roster r 
              LEFT JOIN sens_data s ON s.slug = r.slug 
-             WHERE r.slug = ?
+             WHERE r.slug = ?1 OR r.name = ?1 COLLATE NOCASE
              ORDER BY s.type ASC`,
 		)
-		.bind(slug)
+		.bind(search)
 		.all<SensProfile>();
 	return results;
 }

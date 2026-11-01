@@ -26,7 +26,7 @@ export const sens: Command = {
 	},
 	handler: async (interaction, env) => {
 		const i = interaction as APIChatInputApplicationCommandInteraction;
-		const query = getStringOption(i.data.options, 'character');
+		const query = getStringOption(i.data.options, 'character')?.toLowerCase();
 		let sensProfiles;
 		try {
 			if (!query) {
