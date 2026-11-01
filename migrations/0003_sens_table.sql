@@ -4,13 +4,17 @@ CREATE TABLE sens_data (
 	type TEXT NOT NULL CHECK (type IN ('Controller', 'Mouse & Keyboard')),
 	x_axis TEXT NOT NULL,
 	y_axis TEXT NOT NULL,
+	-- Unix seconds; NULL means the date of the last change is unknown
+	updated_at INTEGER,
 	PRIMARY KEY (slug, type),
 	FOREIGN KEY (slug) REFERENCES hero_roster (slug) ON DELETE RESTRICT
 );
 
--- Create a table for the global (All heros) sens; used as a default for heros with a missing profile
+-- Create a table for the global (All heroes) sens; used as a default for heroes with a missing profile
 CREATE TABLE global_sens_data (
 	type TEXT PRIMARY KEY NOT NULL CHECK (type IN ('Controller', 'Mouse & Keyboard')),
 	x_axis TEXT NOT NULL,
-	y_axis TEXT NOT NULL
+	y_axis TEXT NOT NULL,
+	-- Unix seconds; NULL means the date of the last change is unknown
+	updated_at INTEGER
 );
