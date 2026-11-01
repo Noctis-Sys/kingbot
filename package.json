@@ -10,10 +10,12 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"typecheck": "tsc --noEmit",
-		"register:guild": "tsx --env-file=.env scripts/register.ts guild",
-		"register:global": "tsx --env-file=.env scripts/register.ts global",
-		"register:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
-		"register:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
+		"register:dev:guild": "tsx --env-file=.dev.vars scripts/register.ts guild",
+		"register:dev:clear-guild": "tsx --env-file=.dev.vars scripts/register.ts clear-guild",
+		"register:prod:guild": "tsx --env-file=.env scripts/register.ts guild",
+		"register:prod:global": "tsx --env-file=.env scripts/register.ts global",
+		"register:prod:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
+		"register:prod:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
 	},
 	"devDependencies": {
 		"@types/node": "^26.2.0",

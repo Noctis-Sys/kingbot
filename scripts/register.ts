@@ -31,7 +31,7 @@ const parseScope = (raw: string | undefined): Scope => {
 
 const guildUrl = ({ appId, guildId }: ScopeContext): string => {
 	if (!guildId) {
-		throw new Error('DISCORD_TEST_GUILD_ID must be set in .env for guild registration & clearing commands');
+		throw new Error('DISCORD_TEST_GUILD_ID must be set in the env file for guild registration & clearing commands');
 	}
 	return `https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`;
 };
@@ -88,10 +88,13 @@ async function main() {
 	const guildId = process.env.DISCORD_TEST_GUILD_ID;
 
 	if (!appId || !token) {
-		throw new Error('DISCORD_APPLICATION_ID and DISCORD_TOKEN must be set in .env');
+		throw new Error('DISCORD_APPLICATION_ID and DISCORD_TOKEN must be set in the env file');
 	}
 
 	const { url, payload, summary, confirm } = scopeHandlers[scope]({ appId, guildId, commands });
+
+	// The env file decides which Discord app this targets; name it so a wrong file is visible before anything changes.
+	console.log(`Target application: ${appId}`);
 
 	if (confirm && !assumeYes && !(await confirmed(confirm))) {
 		console.log('Aborted.');
