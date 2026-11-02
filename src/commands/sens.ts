@@ -47,11 +47,15 @@ export const sens: Command = {
 		let embedDescription = '';
 
 		if (sensProfiles[0].type === null) {
-			embedDescription = 'No sens data available for this character. Try `/sens` or `/sens All Heroes` for the All Heroes sens.';
+			embedDescription =
+				'No sens data available for this character. Try </sens:1566315254504235163> or </sens:1566315254504235163> `All Heroes` for the All Heroes sens.';
 		} else {
 			for (const profile of sensProfiles) {
-				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';
-				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}\n\n`;
+				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️ ' : '🎮 ';
+				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}\n`;
+				embedDescription += `-# Last updated: `;
+				embedDescription += profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
+				embedDescription += '\n\n';
 			}
 		}
 
