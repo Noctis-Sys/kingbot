@@ -7,5 +7,5 @@ import { MessageFlags, type APIInteractionResponse, InteractionResponseType } fr
  */
 export const errorReply = (content: string): APIInteractionResponse => ({
 	type: InteractionResponseType.ChannelMessageWithSource,
-	data: { content, flags: MessageFlags.Ephemeral },
+	data: { content, flags: MessageFlags.Ephemeral, allowed_mentions: { parse: [], users: [] } },
 });
