@@ -15,10 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | `npm run dev`                        | Local dev server (`wrangler dev`) on http://localhost:8787                                    |
 | `npm run register:dev:guild`         | PUT the command definitions to the **dev** app's test guild (reads `.dev.vars`)               |
 | `npm run register:dev:clear-guild`   | PUT `[]` to the dev app's test guild, removing its commands (reads `.dev.vars`; prompts)      |
-| `npm run register:prod:guild`        | PUT the command definitions to the **prod** app's test guild (reads `.env`)                   |
-| `npm run register:prod:global`       | PUT the definitions globally for the prod app, minus `developerOnly` ones (reads `.env`)      |
-| `npm run register:prod:clear-guild`  | PUT `[]` to the prod app's test guild (reads `.env`; prompts to confirm)                      |
-| `npm run register:prod:clear-global` | PUT `[]` globally for the prod app, removing every global command (reads `.env`; prompts)     |
+| `npm run register:prod:guild`        | PUT the command definitions to the **prod** app's test guild (via `bws run`)                  |
+| `npm run register:prod:global`       | PUT the definitions globally for the prod app, minus `developerOnly` ones (via `bws run`)     |
+| `npm run register:prod:clear-guild`  | PUT `[]` to the prod app's test guild (via `bws run`; prompts to confirm)                     |
+| `npm run register:prod:clear-global` | PUT `[]` globally for the prod app, removing every global command (via `bws run`; prompts)    |
 | `npm run db:migrate:local`           | `wrangler d1 migrations apply DB --local` — apply pending migrations to the `wrangler dev` DB |
 | `npm run db:migrate:remote`          | `wrangler d1 migrations apply DB --remote` — apply pending migrations to production D1        |
 | `npm run deploy`                     | Deploy to Cloudflare                                                                          |
@@ -64,7 +64,7 @@ Deploying the Worker does **not** tell Discord the command exists. After changin
 1. `npm run deploy` — ships the handler.
 2. One of the `npm run register:*` scripts below — PUTs all definitions. The PUT is a full replace, so a command dropped from the `commands` array disappears from Discord.
 
-`scripts/register.ts` **requires** the target scope as its one positional argument — there is no default. Which Discord app it targets is decided by the env file the npm script loads: `register:dev:*` run `tsx --env-file=.dev.vars` (dev app), `register:prod:*` run `tsx --env-file=.env` (prod app). Scopes:
+`scripts/register.ts` **requires** the target scope as its one positional argument — there is no default. Which Discord app it targets is decided by where the variables come from: `register:dev:*` run `tsx --env-file=.dev.vars` (dev app), `register:prod:*` run `tsx --env-file=.env` with the prod values injected by `bws run` (see _Secrets_). Scopes:
 
 - `guild` (`register:dev:guild`, `register:prod:guild`): PUTs to `DISCORD_TEST_GUILD_ID`. Instant — use this while developing.
 - `global` (`register:prod:global` only): PUTs to every guild, **excluding** `developerOnly` commands; propagation can take up to an hour.
@@ -90,12 +90,21 @@ The account is on the Workers Free plan: 100,000 D1 row writes/day, and since 20
 
 ## Secrets
 
-Two gitignored files hold the same four keys — `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_TOKEN`, `DISCORD_TEST_GUILD_ID` — for two different Discord apps:
+Two Discord apps (dev and prod) share the same four keys — `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_TOKEN`, `DISCORD_TEST_GUILD_ID` — and they are stored differently:
 
-- `.dev.vars` — the **dev** app. Injected into workerd by `wrangler dev` (where `DISCORD_PUBLIC_KEY` is the one the Worker uses) and loaded by `register:dev:*`.
-- `.env` — the **prod** app. Loaded by `register:prod:*`; only `DISCORD_APPLICATION_ID`, `DISCORD_TOKEN`, and `DISCORD_TEST_GUILD_ID` are consumed there. The deployed Worker does not read it.
+- **Prod — Bitwarden Secrets Manager.** The `kingbot` project (id `032fda11-d238-4a6b-bd78-b4f60151e58c`) holds the prod app's `DISCORD_PUBLIC_KEY`, `DISCORD_APPLICATION_ID`, `DISCORD_TOKEN` and `DISCORD_TEST_GUILD_ID` under those exact names, plus the dev app's `DEV_DISCORD_PUBLIC_KEY`, `DEV_DISCORD_APPLICATION_ID` and `DEV_DISCORD_TOKEN`. The test guild ID is shared by both apps, so it has no `DEV_` copy. Run the `register:prod:*` scripts through `bws run`, which injects the secrets as environment variables:
 
-Templates for both are committed (`.env.example`, `.dev.vars.example`, whitelisted in `.gitignore`); copy each and fill in the matching app's values.
+  ```
+  bws run --project-id 032fda11-d238-4a6b-bd78-b4f60151e58c -- npm run register:prod:guild
+  ```
+
+  This needs the `bws` CLI on `PATH` and `BWS_ACCESS_TOKEN` set (a machine-account token, not tied to one device — keep it in the regular Bitwarden vault). The key names must match what `scripts/register.ts` reads from `process.env`, so don't rename the unprefixed ones.
+
+  The npm scripts still pass `--env-file=.env`, and Node's `--env-file` never overrides variables already in the environment, so the injected values win. `.env` is kept as an **empty** gitignored file only because `--env-file` errors when the file is missing. Only `DISCORD_APPLICATION_ID`, `DISCORD_TOKEN` and `DISCORD_TEST_GUILD_ID` are consumed by registration; `DISCORD_PUBLIC_KEY` in Bitwarden is a backup, since the deployed Worker gets its copy from `wrangler secret put` and never reads `.env`. Running a `register:prod:*` script _without_ `bws run` fails on the missing variables.
+
+- **Dev — `.dev.vars`** (gitignored). The dev app's four keys. Injected into workerd by `wrangler dev` (where `DISCORD_PUBLIC_KEY` is the one the Worker uses) and loaded by `register:dev:*`. Dev is not injected via `bws`; the `DEV_` secrets in Bitwarden are a backup for restoring this file on a new device (`bws secret list <project-id>`).
+
+Templates are committed (`.env.example`, `.dev.vars.example`, whitelisted in `.gitignore`); `.dev.vars.example` is copied and filled in with the dev app's values.
 
 `wrangler types` derives the `Env` members from `.dev.vars` (they land in `__BaseEnv_Env`), so a var added there stays untyped until `npm run cf-typegen` is re-run. `wrangler.jsonc` declares no `vars`, so production values must be set with `wrangler secret put`.
 
