@@ -10,6 +10,7 @@ import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
+import { isAllowed } from '../util/verification';
 
 export const setsens: Command = {
 	developerOnly: true,
@@ -29,6 +30,10 @@ export const setsens: Command = {
 	handler: async (interaction, env) => {
 		const i = interaction as APIChatInputApplicationCommandInteraction;
 		const query = getStringOption(i.data.options, 'character')?.toLowerCase();
+
+		if (!isAllowed(i, env)) {
+			return errorReply('You are not allowed to use this command.');
+		}
 		let sensProfiles;
 		let id: string;
 		try {
