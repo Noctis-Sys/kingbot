@@ -29,7 +29,8 @@ export const sens: Command = {
 		const query = getStringOption(i.data.options, 'character')?.toLowerCase();
 		let sensProfiles;
 		try {
-			if (!query) {
+			// A bare `/sens` and a typed "All Heroes" both mean the global profile, which isn't a row in hero_roster.
+			if (!query || query === 'all heroes') {
 				sensProfiles = await getGlobalSensProfile(env.DB);
 			} else {
 				sensProfiles = await getSensProfile(env.DB, query);
@@ -46,7 +47,7 @@ export const sens: Command = {
 		let embedDescription = '';
 
 		if (sensProfiles[0].type === null) {
-			embedDescription = 'No sens data available for this character.';
+			embedDescription = 'No sens data available for this character. Try `/sens` or `/sens All Heroes` for the All Heroes sens.';
 		} else {
 			for (const profile of sensProfiles) {
 				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';

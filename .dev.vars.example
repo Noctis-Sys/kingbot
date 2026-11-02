@@ -1,3 +1,4 @@
+# DEV Discord app — read by wrangler dev and npm run register:dev:*
 DISCORD_PUBLIC_KEY="discord_public_key_here"
 DISCORD_APPLICATION_ID="discord_application_id_here"
 DISCORD_TOKEN="discord_token_here"

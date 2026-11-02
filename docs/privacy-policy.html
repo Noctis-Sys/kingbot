@@ -143,7 +143,7 @@
 		<main>
 			<p class="eyebrow">kingbot</p>
 			<h1>Privacy Policy</h1>
-			<p class="updated">Last updated: 10/09/2026</p>
+			<p class="updated">Last updated: November 1, 2026</p>
 
 			<p>
 				This Privacy Policy explains what information <strong>kingbot</strong> (the &ldquo;Bot&rdquo;) receives, what it stores, and what
@@ -154,17 +154,22 @@
 			<h2>1. How the Bot works</h2>
 			<p>
 				The Bot uses Discord&rsquo;s HTTP interactions model. Discord sends us a signed request only when a user explicitly invokes one of
-				the Bot&rsquo;s slash commands. The Bot does not maintain a persistent Gateway connection, which means it cannot and does not read
-				general chat messages, direct messages, voice activity, or member lists.
+				the Bot&rsquo;s slash commands, or while a user is typing into a command option that offers autocomplete suggestions (Discord sends
+				a request as the text changes, before the command is submitted). The Bot does not maintain a persistent Gateway connection, which
+				means it cannot and does not read general chat messages, direct messages, voice activity, or member lists.
 			</p>
 
 			<h2>2. Information we receive</h2>
-			<p>When you invoke a command, Discord includes the following in the interaction payload:</p>
+			<p>
+				When you invoke a command, or type into an option that offers autocomplete suggestions, Discord includes the following in the
+				interaction payload:
+			</p>
 			<ul>
 				<li>Your Discord user ID, username, display name, and avatar hash</li>
 				<li>Your server nickname, roles, and permissions in that server</li>
 				<li>The server (guild) ID and channel ID where the command was used</li>
 				<li>The command name and any options you supplied, including text you typed and users you selected</li>
+				<li>Partially typed option text, when a command offers autocomplete suggestions</li>
 				<li>An interaction ID and timestamp</li>
 			</ul>
 			<p>
@@ -175,8 +180,9 @@
 			<h2>3. Information we store</h2>
 
 			<p>
-				Most commands store nothing: the interaction payload is processed in memory to generate a response and is then discarded. The
-				exception is <code>/charge</code>, which keeps a running count. We store:
+				Most commands store nothing: the interaction payload is processed in memory to generate a response and is then discarded. For
+				example, <code>/sens</code>, including its autocomplete suggestions, only reads public game-setting data and stores nothing about
+				you. The exception is <code>/charge</code>, which keeps a running count. We store:
 			</p>
 			<div class="table-wrap">
 				<table>
@@ -212,8 +218,9 @@
 				per server, so the leaderboard covers every server.
 			</p>
 			<p>
-				Transient operational logs may briefly exist in our hosting provider&rsquo;s systems for error diagnosis. These are not retained by
-				us as a durable record.
+				Operational logs, which may include details of a request such as the command used, are kept in our hosting provider&rsquo;s systems
+				(Cloudflare Workers Logs) for error diagnosis and are automatically deleted after up to 3 days. We do not keep them as a durable
+				record.
 			</p>
 
 			<h2>4. Why we process this data</h2>
@@ -241,10 +248,10 @@
 			<ul>
 				<li><strong>Stop sharing data:</strong> stop using the Bot&rsquo;s commands, or remove the Bot from your server.</li>
 				<li>
-					<strong>Deletion:</strong> you can request deletion of any stored data associated with your Discord user ID or your server by
-					contacting us at <a href="mailto:contact@noctis-systems.com">contact@noctis-systems.com</a>. Include your Discord user ID or
-					server ID so we can identify the records. We will respond within 30 days. Deleting your charge count removes you from the
-					leaderboard; the overall charge total is not reduced, since it is not linked to you.
+					<strong>Deletion:</strong> you can request deletion of any stored data associated with your Discord user ID by contacting us at
+					<a href="mailto:contact@noctis-systems.com">contact@noctis-systems.com</a>. Include your Discord user ID so we can identify the
+					records. We will respond within 30 days. Deleting your charge count removes you from the leaderboard; the overall charge total is
+					not reduced, since it is not linked to you.
 				</li>
 				<li><strong>Access:</strong> you can request a copy of any stored data associated with you using the same contact method.</li>
 			</ul>
@@ -268,7 +275,7 @@
 			<h2>10. Changes to this policy</h2>
 			<p>
 				We may update this policy. The &ldquo;Last updated&rdquo; date above will change when we do. Material changes will be noted in the
-				Bot&rsquo;s GitHub repository when necessary.
+				Bot&rsquo;s <a href="https://github.com/Noctis-Sys/kingbot">GitHub repository</a> when necessary.
 			</p>
 
 			<h2>11. Contact</h2>
@@ -277,7 +284,7 @@
 			</p>
 
 			<footer>
-				<p>See also the <a href="/legal/terms-of-service">Terms of Service</a>.</p>
+				<p>See also the <a href="https://kingbot-c36.pages.dev/terms-of-service">Terms of Service</a>.</p>
 			</footer>
 		</main>
 	</body>

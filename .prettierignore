@@ -7,3 +7,6 @@ package-lock.json
 # Build output and dependencies
 node_modules/
 .wrangler/
+
+# Applied D1 migrations are immutable history (D1 tracks them by filename, not content) — never rewrite them, formatting included
+migrations/

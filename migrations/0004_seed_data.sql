@@ -185,13 +185,10 @@ VALUES
 		'2.0',
 		'2.0',
 		1784945043
-	);
+	); -- 2026-07-25
 
--- 2026-07-25
 -- The 'All Heroes' profile, used as the default for heroes without a row in sens_data
 INSERT INTO
 	global_sens_data (type, x_axis, y_axis, updated_at)
 VALUES
-	('Controller', '262', '212', 1791764799);
-
--- 2026-10-12
+	('Controller', '262', '212', 1791764799); -- 2026-10-12

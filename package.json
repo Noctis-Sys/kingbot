@@ -15,7 +15,12 @@
 		"register:prod:guild": "tsx --env-file=.env scripts/register.ts guild",
 		"register:prod:global": "tsx --env-file=.env scripts/register.ts global",
 		"register:prod:clear-guild": "tsx --env-file=.env scripts/register.ts clear-guild",
-		"register:prod:clear-global": "tsx --env-file=.env scripts/register.ts clear-global"
+		"register:prod:clear-global": "tsx --env-file=.env scripts/register.ts clear-global",
+		"db:migrate:local": "wrangler d1 migrations apply DB --local",
+		"db:migrate:remote": "wrangler d1 migrations apply DB --remote"
+	},
+	"engines": {
+		"node": ">=20.6"
 	},
 	"devDependencies": {
 		"@types/node": "^26.2.0",
