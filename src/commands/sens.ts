@@ -52,7 +52,11 @@ export const sens: Command = {
 		} else {
 			for (const profile of sensProfiles) {
 				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️ ' : '🎮 ';
-				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}\n`;
+				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}`;
+				if (profile.dpi !== null) {
+					embedDescription += ` @ ${profile.dpi} DPI`;
+				}
+				embedDescription += '\n';
 				embedDescription += `-# Last updated: `;
 				embedDescription += profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
 				embedDescription += '\n\n';
