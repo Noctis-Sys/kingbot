@@ -11,7 +11,7 @@ It is an **interaction webhook**, not a Gateway bot. Discord POSTs each slash-co
 | `/ping`              | —                                            | Replies `Pong`. Developer-only, so it is never registered globally.                                                             |
 | `/aura`              | `target` (user, optional)                    | Rolls an "aura" number from 1–1000 for you or someone else.                                                                     |
 | `/duel`              | `target` (user, required)                    | Simulates a shootout between you and the target; the winner is a coin flip.                                                     |
-| `/sens`              | `character` (string, autocomplete, optional) | Prints a Marvel Rivals sensitivity profile, read from D1. With no argument, returns the `All Heroes` profile.                   |
+| `/sens`              | `character` (string, autocomplete, optional) | Prints a Marvel Rivals sensitivity profile, read from D1. With no argument, returns the `All Characters` profile.               |
 | `/charge`            | —                                            | Posts an embed of you charging into battle, with the global charge number in the footer. Each charge is counted per user in D1. |
 | `/chargeleaderboard` | —                                            | Shows the top 10 chargers and the global charge total. Read-only — viewing it does not count as a charge.                       |
 
@@ -77,14 +77,14 @@ If the commands are not immediately present, reload Discord (`ctrl+r` in both th
 
 The D1 database `kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Its schema and seed data live in `migrations/` as numbered `.sql` files:
 
-| Migration                | Contents                                                   |
-| ------------------------ | ---------------------------------------------------------- |
-| `0001_charge_counts.sql` | `counters` and `user_charges` — the `/charge` counts       |
-| `0002_hero_roster.sql`   | `hero_roster` — hero slugs and display names               |
-| `0003_sens_table.sql`    | `sens_data` (per hero) and `global_sens_data` (All Heroes) |
-| `0004_seed_data.sql`     | Seed rows for the roster and sens tables                   |
-| `0005_add_dpi.sql`       | Nullable `dpi` column on both sens tables (M&K rows only)  |
-| `0006_seed_dpi.sql`      | DPI values and the All Heroes Mouse & Keyboard row         |
+| Migration                | Contents                                                       |
+| ------------------------ | -------------------------------------------------------------- |
+| `0001_charge_counts.sql` | `counters` and `user_charges` — the `/charge` counts           |
+| `0002_hero_roster.sql`   | `hero_roster` — hero slugs and display names                   |
+| `0003_sens_table.sql`    | `sens_data` (per hero) and `global_sens_data` (All Characters) |
+| `0004_seed_data.sql`     | Seed rows for the roster and sens tables                       |
+| `0005_add_dpi.sql`       | Nullable `dpi` column on both sens tables (M&K rows only)      |
+| `0006_seed_dpi.sql`      | DPI values and the All Characters Mouse & Keyboard row         |
 
 Apply migrations yourself — the push-to-deploy build does **not** run them:
 
@@ -218,7 +218,7 @@ A few payload idioms worth knowing: the invoker is `interaction.member?.user ?? 
 
 **Mentions render but never ping.** Every message that interpolates a user sets `allowed_mentions: { parse: [], users: [] }`, so `<@id>` displays as a name without generating a notification. Content is assembled from user-supplied targets, so allow-nothing is the safe default.
 
-**`/sens` data lives in the database, not the definition.** Heroes are in `hero_roster`, per-hero values in `sens_data`, and the All Heroes profile in `global_sens_data`. The `character` option uses autocomplete instead of a fixed `choices` list: suggestions match the typed text against hero name or slug, capped at `LIMIT 25` to match Discord's limit on autocomplete results. The handler accepts either a picked suggestion (a slug) or a freely typed hero name, matched case-insensitively; typing `All Heroes` gives the same global profile as a bare `/sens`. An unknown hero gets an `errorReply`, and a known hero with no `sens_data` rows shows "No sens data available for this character." with a hint to try `/sens` or `/sens All Heroes` — it deliberately does not fall back to the global values. Because the option definition never lists the heroes, editing the data is a database write (see [Database](#database)) — not a re-register.
+**`/sens` data lives in the database, not the definition.** Heroes are in `hero_roster`, per-hero values in `sens_data`, and the All Characters profile in `global_sens_data`. The `character` option uses autocomplete instead of a fixed `choices` list: suggestions match the typed text against hero name or slug, capped at `LIMIT 25` to match Discord's limit on autocomplete results. The handler accepts either a picked suggestion (a slug) or a freely typed character name, matched case-insensitively; typing `All Characters` gives the same global profile as a bare `/sens`. An unknown character gets an `errorReply`, and a known character with no `sens_data` rows shows "No sens data available for this character." with a hint to try `/sens` or `/sens All Characters` — it deliberately does not fall back to the global values. Because the option definition never lists the heroes, editing the data is a database write (see [Database](#database)) — not a re-register.
 
 ## Verification
 
