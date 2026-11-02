@@ -26,7 +26,7 @@ export async function getRosterData(db: D1Database, search: string): Promise<Ros
 export async function getSensProfile(db: D1Database, search: string): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
-			`SELECT r.name, s.type, s.x_axis, s.y_axis, s.dpi, s.updated_at
+			`SELECT r.name, r.slug, s.type, s.x_axis, s.y_axis, s.dpi, s.updated_at
              FROM hero_roster r 
              LEFT JOIN sens_data s ON s.slug = r.slug 
              WHERE r.slug = ?1 OR r.name = ?1 COLLATE NOCASE
@@ -57,6 +57,7 @@ export interface RosterEntry {
 export interface SensProfile {
 	name: string;
 	type: string | null;
+	slug: string | null;
 	x_axis: string | null;
 	y_axis: string | null;
 	// Only ever set on Mouse & Keyboard rows; NULL when unknown.
