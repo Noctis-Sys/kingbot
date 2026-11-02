@@ -26,7 +26,7 @@ export async function getRosterData(db: D1Database, search: string): Promise<Ros
 export async function getSensProfile(db: D1Database, search: string): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
-			`SELECT r.name, s.type, s.x_axis, s.y_axis, s.updated_at
+			`SELECT r.name, s.type, s.x_axis, s.y_axis, s.dpi, s.updated_at
              FROM hero_roster r 
              LEFT JOIN sens_data s ON s.slug = r.slug 
              WHERE r.slug = ?1 OR r.name = ?1 COLLATE NOCASE
@@ -40,7 +40,7 @@ export async function getSensProfile(db: D1Database, search: string): Promise<Se
 export async function getGlobalSensProfile(db: D1Database): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
-			`SELECT 'All Heroes' as name, type, x_axis, y_axis, updated_at
+			`SELECT 'All Heroes' as name, type, x_axis, y_axis, dpi, updated_at
                 FROM global_sens_data
                 ORDER BY type
             `,
@@ -59,5 +59,7 @@ export interface SensProfile {
 	type: string | null;
 	x_axis: string | null;
 	y_axis: string | null;
+	// Only ever set on Mouse & Keyboard rows; NULL when unknown.
+	dpi: number | null;
 	updated_at: number | null;
 }

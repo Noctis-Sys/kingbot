@@ -48,8 +48,8 @@ There is **no test suite** — no `npm test`, nothing under `test/`. `npm run ty
 **`sens` is D1-driven.** All data lives in three tables (migrations `0002`/`0003`, queried from `src/db/query.ts`):
 
 - `hero_roster(slug PK, name UNIQUE)` — the heroes; `sens_data.slug` references it.
-- `sens_data(slug, type, x_axis, y_axis, updated_at)` — PK `(slug, type)`, `type` CHECK-constrained to `'Controller'` | `'Mouse & Keyboard'`, axes stored as `TEXT`, `updated_at` Unix seconds or `NULL` when unknown.
-- `global_sens_data(type PK, x_axis, y_axis, updated_at)` — the "All Heroes" row set.
+- `sens_data(slug, type, x_axis, y_axis, updated_at, dpi)` — PK `(slug, type)`, `type` CHECK-constrained to `'Controller'` | `'Mouse & Keyboard'`, axes stored as `TEXT`, `updated_at` Unix seconds or `NULL` when unknown. `dpi` (migration `0005`) is a nullable `INTEGER`, CHECK-constrained to be `NULL` on Controller rows; the handler appends ` @ <dpi> DPI` to a row's line only when it is set.
+- `global_sens_data(type PK, x_axis, y_axis, updated_at, dpi)` — the "All Heroes" row set, same `dpi` rule.
 
 A bare `/sens` — or a typed `All Heroes` (any case), since that name is not a `hero_roster` row — calls `getGlobalSensProfile` (rows labelled `'All Heroes'`). Otherwise the handler lowercases the argument and calls `getSensProfile`, which matches `r.slug = ?1` (a picked suggestion submits the slug) **or** `r.name = ?1 COLLATE NOCASE` (free-typed name). That query `LEFT JOIN`s `sens_data`, so a hero with no sens rows still returns one row with `type` `NULL`, rendered as "No sens data available…" plus a hint to try `/sens` or `/sens All Heroes`; zero rows (no such hero) goes to `errorReply`. **No fallback, by decision:** migration `0003`'s comment (and `0004`'s) describes `global_sens_data` as the default for heroes with a missing profile, but the maintainer chose _not_ to fall back — a hero without rows gets the message and hint, never the global values. Don't add a fallback. (The migration comments stay as they are — applied migrations are immutable.)
 
@@ -79,7 +79,7 @@ Each scope is one entry in the `scopeHandlers` record, returning the `{ url, pay
 
 ## D1
 
-`kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Schema lives in `migrations/` as numbered `.sql` files: `0001` charge counts, `0002` `hero_roster`, `0003` `sens_data` + `global_sens_data`, `0004` seeds the roster and the known sens values. Queries live in `src/db/`:
+`kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Schema lives in `migrations/` as numbered `.sql` files: `0001` charge counts, `0002` `hero_roster`, `0003` `sens_data` + `global_sens_data`, `0004` seeds the roster and the known sens values, `0005` adds `dpi` to both sens tables, `0006` seeds DPI and the All Heroes Mouse & Keyboard row. Queries live in `src/db/`:
 
 - `charges.ts` — `recordCharge` upserts `user_charges` and bumps the `'charge'` row in `counters` in one `batch`, which D1 runs as a transaction; `getChargeLeaderboard` reads the top N plus the total. `/chargeleaderboard` (`chargeLeaderboard.ts`) shows it and only reads, so viewing it never counts as a charge. Counts are per user across every server, so the leaderboard can list users from other servers, who render as unknown `<@id>` mentions.
 - `query.ts` — the `/sens` reads: `getRosterData`, `getSensProfile`, `getGlobalSensProfile` (see _`sens` is D1-driven_).

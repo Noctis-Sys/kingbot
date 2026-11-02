@@ -83,6 +83,8 @@ The D1 database `kingbot-db` is bound as `env.DB` (`wrangler.jsonc`). Its schema
 | `0002_hero_roster.sql`   | `hero_roster` — hero slugs and display names               |
 | `0003_sens_table.sql`    | `sens_data` (per hero) and `global_sens_data` (All Heroes) |
 | `0004_seed_data.sql`     | Seed rows for the roster and sens tables                   |
+| `0005_add_dpi.sql`       | Nullable `dpi` column on both sens tables (M&K rows only)  |
+| `0006_seed_dpi.sql`      | DPI values and the All Heroes Mouse & Keyboard row         |
 
 Apply migrations yourself — the push-to-deploy build does **not** run them:
 
