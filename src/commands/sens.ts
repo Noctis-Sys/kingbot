@@ -8,6 +8,7 @@ import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
+import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
 
 export const sens: Command = {
 	developerOnly: false,
@@ -29,8 +30,8 @@ export const sens: Command = {
 		const query = getStringOption(i.data.options, 'character')?.toLowerCase();
 		let sensProfiles;
 		try {
-			// A bare `/sens` and a typed "All Heroes" both mean the global profile, which isn't a row in hero_roster.
-			if (!query || query === 'all heroes') {
+			// A bare `/sens` and a typed "All Characters" both mean the global profile, which isn't a row in hero_roster.
+			if (!query || isAllCharacters(query)) {
 				sensProfiles = await getGlobalSensProfile(env.DB);
 			} else {
 				sensProfiles = await getSensProfile(env.DB, query);
@@ -41,14 +42,13 @@ export const sens: Command = {
 		}
 
 		if (sensProfiles.length === 0) {
-			return errorReply(`No sens profiles found for character: ${query ?? 'All Heroes'}`);
+			return errorReply(`No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`);
 		}
 
 		let embedDescription = '';
 
 		if (sensProfiles[0].type === null) {
-			embedDescription =
-				'No sens data available for this character. Try </sens:1566315254504235163> or </sens:1566315254504235163> `All Heroes` for the All Heroes sens.';
+			embedDescription = `No sens data available for this character. Try </sens:1566315254504235163> or </sens:1566315254504235163> \`${ALL_CHARACTERS.name}\` for the ${ALL_CHARACTERS.name} sens.`;
 		} else {
 			for (const profile of sensProfiles) {
 				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️ ' : '🎮 ';
@@ -93,9 +93,9 @@ export const sens: Command = {
 			};
 		}
 		const choices = roster.map((p) => ({ name: p.name, value: p.slug }));
-		// "All Heroes" isn't a hero_roster row; the handler maps its value to the global profile.
-		if ('all heroes'.includes(query.toLowerCase())) {
-			choices.unshift({ name: 'All Heroes', value: 'all heroes' });
+		// "All Characters" isn't a hero_roster row; the handler maps its value to the global profile.
+		if (suggestsAllCharacters(query)) {
+			choices.unshift({ ...ALL_CHARACTERS });
 		}
 		return {
 			type: InteractionResponseType.ApplicationCommandAutocompleteResult,

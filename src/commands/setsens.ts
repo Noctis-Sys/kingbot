@@ -9,6 +9,7 @@ import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
+import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
 
 export const setsens: Command = {
 	developerOnly: true,
@@ -29,24 +30,27 @@ export const setsens: Command = {
 		const i = interaction as APIChatInputApplicationCommandInteraction;
 		const query = getStringOption(i.data.options, 'character')?.toLowerCase();
 		let sensProfiles;
+		let id: string;
 		try {
-			if (!query || query === 'all heroes') {
+			if (!query || isAllCharacters(query)) {
 				sensProfiles = await getGlobalSensProfile(env.DB);
+				id = ALL_CHARACTERS.value;
 			} else {
 				sensProfiles = await getSensProfile(env.DB, query);
+				id = sensProfiles[0]?.slug ?? query;
 			}
 		} catch (error) {
 			console.error('[setsens] Failed to fetch sens profiles:', error);
 			return errorReply('Failed to fetch sens profiles. Please try again later.');
 		}
 		if (sensProfiles.length === 0) {
-			return errorReply(`No hero found: <${query ?? 'All Heroes'}>`);
+			return errorReply(`No character found: <${query ?? ALL_CHARACTERS.name}>`);
 		}
 
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				content: `Found: ${sensProfiles[0].name} (${sensProfiles[0].slug ?? 'global'})`,
+				content: `Found: ${sensProfiles[0].name} (${id})`,
 				flags: MessageFlags.Ephemeral,
 				allowed_mentions: { parse: [], users: [] },
 			},
@@ -68,9 +72,9 @@ export const setsens: Command = {
 			};
 		}
 		const choices = roster.map((p) => ({ name: p.name, value: p.slug }));
-		// "All Heroes" isn't a hero_roster row; the handler maps its value to the global profile.
-		if ('all heroes'.includes(query.toLowerCase())) {
-			choices.unshift({ name: 'All Heroes', value: 'all heroes' });
+		// "All Characters" isn't a hero_roster row; the handler maps its value to the global profile.
+		if (suggestsAllCharacters(query)) {
+			choices.unshift({ ...ALL_CHARACTERS });
 		}
 		return {
 			type: InteractionResponseType.ApplicationCommandAutocompleteResult,

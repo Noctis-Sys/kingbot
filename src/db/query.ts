@@ -1,4 +1,5 @@
 // Database functions for accessing sens data.
+import { ALL_CHARACTERS } from '../util/allCharacters';
 
 export async function getRosterData(db: D1Database, search: string): Promise<RosterEntry[]> {
 	const { results } = await db
@@ -22,7 +23,7 @@ export async function getRosterData(db: D1Database, search: string): Promise<Ros
 	return results;
 }
 
-// `search` is a slug when a suggestion was picked, or a typed hero name (any case) when it wasn't.
+// `search` is a slug when a suggestion was picked, or a typed character name (any case) when it wasn't.
 export async function getSensProfile(db: D1Database, search: string): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
@@ -40,11 +41,12 @@ export async function getSensProfile(db: D1Database, search: string): Promise<Se
 export async function getGlobalSensProfile(db: D1Database): Promise<SensProfile[]> {
 	const { results } = await db
 		.prepare(
-			`SELECT 'All Heroes' as name, type, x_axis, y_axis, dpi, updated_at
+			`SELECT ?1 as name, type, x_axis, y_axis, dpi, updated_at
                 FROM global_sens_data
                 ORDER BY type
             `,
 		)
+		.bind(ALL_CHARACTERS.name)
 		.all<SensProfile>();
 	return results;
 }
