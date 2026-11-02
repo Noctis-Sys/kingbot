@@ -84,10 +84,16 @@ export const sens: Command = {
 				},
 			};
 		}
+		const choices = roster.map((p) => ({ name: p.name, value: p.slug }));
+		// "All Heroes" isn't a hero_roster row; the handler maps its value to the global profile.
+		if ('all heroes'.includes(query.toLowerCase())) {
+			choices.unshift({ name: 'All Heroes', value: 'all heroes' });
+		}
 		return {
 			type: InteractionResponseType.ApplicationCommandAutocompleteResult,
 			data: {
-				choices: roster.map((p) => ({ name: p.name, value: p.slug })),
+				// Discord rejects the whole response (not just the extras) above 25 choices.
+				choices: choices.slice(0, 25),
 			},
 		};
 	},
