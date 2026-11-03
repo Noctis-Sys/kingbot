@@ -4,6 +4,8 @@ import {
 	MessageFlags,
 	type APIChatInputApplicationCommandInteraction,
 	type APIApplicationCommandAutocompleteInteraction,
+	ComponentType,
+	ButtonStyle,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
@@ -11,6 +13,7 @@ import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
 import { isAllowed } from '../util/verification';
+import { buildSensEmbed } from '../util/formatting';
 
 export const setsens: Command = {
 	developerOnly: true,
@@ -55,7 +58,16 @@ export const setsens: Command = {
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				content: `Found: ${sensProfiles[0].name} (${id})`,
+				embeds: [buildSensEmbed(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
+				components: [
+					{
+						type: ComponentType.ActionRow,
+						components: [
+							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Controller', custom_id: `setsens:${id}:controller` },
+							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Mouse & Keyboard', custom_id: `setsens:${id}:mkb` },
+						],
+					},
+				],
 				flags: MessageFlags.Ephemeral,
 				allowed_mentions: { parse: [], users: [] },
 			},

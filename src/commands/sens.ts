@@ -9,6 +9,7 @@ import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
+import { buildSensEmbed } from '../util/formatting';
 
 export const sens: Command = {
 	developerOnly: false,
@@ -45,34 +46,10 @@ export const sens: Command = {
 			return errorReply(`No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`);
 		}
 
-		let embedDescription = '';
-
-		if (sensProfiles[0].type === null) {
-			embedDescription = `No sens data available for this character. Try </sens:1566315254504235163> or </sens:1566315254504235163> \`${ALL_CHARACTERS.name}\` for the ${ALL_CHARACTERS.name} sens.`;
-		} else {
-			for (const profile of sensProfiles) {
-				embedDescription += profile.type === 'Mouse & Keyboard' ? '🖱️ ' : '🎮 ';
-				embedDescription += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}`;
-				if (profile.dpi !== null) {
-					embedDescription += ` @ ${profile.dpi} DPI`;
-				}
-				embedDescription += '\n';
-				embedDescription += `-# Last updated: `;
-				embedDescription += profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
-				embedDescription += '\n\n';
-			}
-		}
-
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				embeds: [
-					{
-						color: 0x00ff00,
-						title: `Sens for ${sensProfiles[0].name}`,
-						description: embedDescription,
-					},
-				],
+				embeds: [buildSensEmbed(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
 				allowed_mentions: { parse: [], users: [] },
 			},
 		};
