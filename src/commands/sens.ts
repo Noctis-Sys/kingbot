@@ -51,7 +51,7 @@ export const sens: Command = {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
 				flags: MessageFlags.IsComponentsV2,
-				components: [buildSensContainer(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
+				components: [buildSensContainer(sensProfiles, `No sens profile available for **${sensProfiles[0].name}**. Try </sens:1566315254504235163> or </sens:1566315254504235163> \`${ALL_CHARACTERS.name}\` for the **${ALL_CHARACTERS.name}** sens.`)],
 				allowed_mentions: { parse: [], users: [] },
 			},
 		};

@@ -38,14 +38,11 @@ export const setsens: Command = {
 			return errorReply('You are not allowed to use this command.');
 		}
 		let sensProfiles;
-		let id: string;
 		try {
 			if (!query || isAllCharacters(query)) {
 				sensProfiles = await getGlobalSensProfile(env.DB);
-				id = ALL_CHARACTERS.value;
 			} else {
 				sensProfiles = await getSensProfile(env.DB, query);
-				id = sensProfiles[0]?.slug ?? query;
 			}
 		} catch (error) {
 			console.error('[setsens] Failed to fetch sens profiles:', error);
@@ -59,12 +56,12 @@ export const setsens: Command = {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
 				components: [
-					buildSensContainer(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`),
+					buildSensContainer(sensProfiles, `No sens profiles found for character: **${query ?? ALL_CHARACTERS.name}**, click a button to edit the sens profile.`),
 					{
 						type: ComponentType.ActionRow,
 						components: [
-							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Controller', custom_id: `setsens:${id}:controller` },
-							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Mouse & Keyboard', custom_id: `setsens:${id}:mkb` },
+							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Controller', custom_id: `setsens:${sensProfiles[0].slug}:controller` },
+							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Mouse & Keyboard', custom_id: `setsens:${sensProfiles[0].slug}:mkb` },
 						],
 					},
 				],

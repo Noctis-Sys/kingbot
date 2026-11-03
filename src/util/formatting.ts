@@ -5,8 +5,8 @@ export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: st
 	let components: APITextDisplayComponent[];
 
 	// A character with no sens rows comes back as one row whose type (and every other sens field) is null.
-	if (sensProfiles[0]?.type == null) {
-		components = [{ type: ComponentType.TextDisplay, content: emptyMessage }];
+	if (sensProfiles[0].type == null) {
+		components = [{type: ComponentType.TextDisplay, content: `**Sens Profile for ${sensProfiles[0].name}**`}, { type: ComponentType.TextDisplay, content: emptyMessage }];
 	} else {
 		components = sensProfiles.map((profile) => {
 			const icon = profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';
@@ -17,8 +17,11 @@ export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: st
 				content: `${icon} **${profile.type}**: ${profile.x_axis} & ${profile.y_axis}${dpi}\n-# Last updated: ${lastUpdated}`,
 			};
 		});
+		components.unshift({
+			type: ComponentType.TextDisplay,
+			content: `**Sens Profile for ${sensProfiles[0].name}**`,
+		})
 	}
-
 	return {
 		type: ComponentType.Container,
 		accent_color: 0xc90076,
