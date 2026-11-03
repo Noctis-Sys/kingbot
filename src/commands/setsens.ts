@@ -13,7 +13,7 @@ import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
 import { isAllowed } from '../util/verification';
-import { buildSensEmbed } from '../util/formatting';
+import { buildSensContainer } from '../util/formatting';
 
 export const setsens: Command = {
 	developerOnly: true,
@@ -58,8 +58,8 @@ export const setsens: Command = {
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				embeds: [buildSensEmbed(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
 				components: [
+					buildSensContainer(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`),
 					{
 						type: ComponentType.ActionRow,
 						components: [
@@ -68,7 +68,7 @@ export const setsens: Command = {
 						],
 					},
 				],
-				flags: MessageFlags.Ephemeral,
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 				allowed_mentions: { parse: [], users: [] },
 			},
 		};

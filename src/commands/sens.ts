@@ -1,6 +1,7 @@
 import {
 	ApplicationCommandOptionType,
 	InteractionResponseType,
+	MessageFlags,
 	type APIChatInputApplicationCommandInteraction,
 	type APIApplicationCommandAutocompleteInteraction,
 } from 'discord-api-types/v10';
@@ -9,7 +10,7 @@ import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
 import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
-import { buildSensEmbed } from '../util/formatting';
+import { buildSensContainer } from '../util/formatting';
 
 export const sens: Command = {
 	developerOnly: false,
@@ -49,7 +50,8 @@ export const sens: Command = {
 		return {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
-				embeds: [buildSensEmbed(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
+				flags: MessageFlags.IsComponentsV2,
+				components: [buildSensContainer(sensProfiles, `No sens profiles found for character: ${query ?? ALL_CHARACTERS.name}`)],
 				allowed_mentions: { parse: [], users: [] },
 			},
 		};

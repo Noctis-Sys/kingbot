@@ -1,30 +1,27 @@
-import { APIEmbed } from 'discord-api-types/v10';
-import { SensProfile } from '../db/query';
+import { ComponentType, type APIContainerComponent, type APITextDisplayComponent } from 'discord-api-types/v10';
+import type { SensProfile } from '../db/query';
 
-export function buildSensEmbed(sensProfiles: SensProfile[], emptyMessage: string): APIEmbed {
-	let embedContent = '';
-	// Checking type but the other sens fields are null when no sens profile
+export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: string): APIContainerComponent {
+	let components: APITextDisplayComponent[];
 
-	if (sensProfiles[0].type === null) {
-		embedContent = emptyMessage;
+	// A character with no sens rows comes back as one row whose type (and every other sens field) is null.
+	if (sensProfiles[0]?.type == null) {
+		components = [{ type: ComponentType.TextDisplay, content: emptyMessage }];
 	} else {
-		for (const profile of sensProfiles) {
-			embedContent += profile.type === 'Mouse & Keyboard' ? '🖱️ ' : '🎮 ';
-			embedContent += `**${profile.type}**: ${profile.x_axis} & ${profile.y_axis}`;
-			if (profile.dpi !== null) {
-				embedContent += ` @ ${profile.dpi} DPI`;
-			}
-			embedContent += '\n';
-			embedContent += `-# Last updated: `;
-			embedContent += profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
-			embedContent += '\n\n';
-		}
+		components = sensProfiles.map((profile) => {
+			const icon = profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';
+			const dpi = profile.dpi !== null ? ` @ ${profile.dpi} DPI` : '';
+			const lastUpdated = profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
+			return {
+				type: ComponentType.TextDisplay,
+				content: `${icon} **${profile.type}**: ${profile.x_axis} & ${profile.y_axis}${dpi}\n-# Last updated: ${lastUpdated}`,
+			};
+		});
 	}
 
-	let sensEmbed = {
-		color: 0x00ff00,
-		title: `Sens for ${sensProfiles[0].name}`,
-		description: embedContent.trim(),
+	return {
+		type: ComponentType.Container,
+		accent_color: 0xc90076,
+		components,
 	};
-	return sensEmbed;
 }
