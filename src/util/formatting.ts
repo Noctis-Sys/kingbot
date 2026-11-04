@@ -46,7 +46,7 @@ export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: st
 				accessory: {
 					type: ComponentType.Button,
 					style: ButtonStyle.Secondary,
-					label: 'Edit',
+					label: profile?.type ? `Edit` : `Set`,
 					custom_id: `setsens:${slug}:${sensType.code}`,
 				},
 			};
