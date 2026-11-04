@@ -4,8 +4,6 @@ import {
 	MessageFlags,
 	type APIChatInputApplicationCommandInteraction,
 	type APIApplicationCommandAutocompleteInteraction,
-	ComponentType,
-	ButtonStyle,
 } from 'discord-api-types/v10';
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
@@ -56,14 +54,11 @@ export const setsens: Command = {
 			type: InteractionResponseType.ChannelMessageWithSource,
 			data: {
 				components: [
-					buildSensContainer(sensProfiles, `No sens profiles found for character: **${query ?? ALL_CHARACTERS.name}**, click a button to edit the sens profile.`),
-					{
-						type: ComponentType.ActionRow,
-						components: [
-							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Controller', custom_id: `setsens:${sensProfiles[0].slug}:controller` },
-							{ type: ComponentType.Button, style: ButtonStyle.Primary, label: 'Mouse & Keyboard', custom_id: `setsens:${sensProfiles[0].slug}:mkb` },
-						],
-					},
+					buildSensContainer(
+						sensProfiles,
+						`No sens profiles found for character: **${query ?? ALL_CHARACTERS.name}**, click a button to edit the sens profile.`,
+						true,
+					),
 				],
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 				allowed_mentions: { parse: [], users: [] },

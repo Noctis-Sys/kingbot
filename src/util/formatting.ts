@@ -1,27 +1,61 @@
-import { ComponentType, type APIContainerComponent, type APITextDisplayComponent } from 'discord-api-types/v10';
+import {
+	APIComponentInContainer,
+	ComponentType,
+	type APIContainerComponent,
+	type APITextDisplayComponent,
+	type APISectionComponent,
+	ButtonStyle,
+} from 'discord-api-types/v10';
 import type { SensProfile } from '../db/query';
+const SENS_TYPES = [
+	{ type: 'Mouse & Keyboard', code: 'mkb', icon: '🖱️' },
+	{ type: 'Controller', code: 'controller', icon: '🎮' },
+] as const;
+export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: string, editable: boolean): APIContainerComponent {
+	let components: APIComponentInContainer[];
 
-export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: string): APIContainerComponent {
-	let components: APITextDisplayComponent[];
+	// Set the header text
+	let header: APITextDisplayComponent = {
+		type: ComponentType.TextDisplay,
+		content: `**Sens Profiles for ${sensProfiles[0].name}**`,
+	};
+	components = [header];
 
-	// A character with no sens rows comes back as one row whose type (and every other sens field) is null.
-	if (sensProfiles[0].type == null) {
-		components = [{type: ComponentType.TextDisplay, content: `**Sens Profile for ${sensProfiles[0].name}**`}, { type: ComponentType.TextDisplay, content: emptyMessage }];
-	} else {
-		components = sensProfiles.map((profile) => {
-			const icon = profile.type === 'Mouse & Keyboard' ? '🖱️' : '🎮';
-			const dpi = profile.dpi !== null ? ` @ ${profile.dpi} DPI` : '';
-			const lastUpdated = profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown';
-			return {
-				type: ComponentType.TextDisplay,
-				content: `${icon} **${profile.type}**: ${profile.x_axis} & ${profile.y_axis}${dpi}\n-# Last updated: ${lastUpdated}`,
-			};
-		});
-		components.unshift({
+	// Every row shares the character's slug (the global profile's is ALL_CHARACTERS.value), so it identifies the button target.
+	const slug = sensProfiles[0].slug;
+
+	// Build the TextDisplay components for each sens profile
+	for (const sensType of SENS_TYPES) {
+		const profile = sensProfiles.find((p) => p.type === sensType.type);
+		let content: string;
+		if (profile) {
+			content = `**${sensType.icon} ${profile.type}**\nX-Axis: \`${profile.x_axis ?? 'N/A'}\`\nY-Axis: \`${profile.y_axis ?? 'N/A'}\`\n`;
+			content += profile.dpi !== null ? `DPI: \`${profile.dpi}\`\n` : '';
+		} else {
+			content = `**${sensType.icon} ${sensType.type}**\nNo profile available.`;
+		}
+		const textDisplay: APITextDisplayComponent = {
 			type: ComponentType.TextDisplay,
-			content: `**Sens Profile for ${sensProfiles[0].name}**`,
-		})
+			content,
+		};
+
+		if (editable && slug) {
+			const section: APISectionComponent = {
+				type: ComponentType.Section,
+				components: [textDisplay],
+				accessory: {
+					type: ComponentType.Button,
+					style: ButtonStyle.Secondary,
+					label: 'Edit',
+					custom_id: `setsens:${slug}:${sensType.code}`,
+				},
+			};
+			components.push(section);
+		} else {
+			components.push(textDisplay);
+		}
 	}
+
 	return {
 		type: ComponentType.Container,
 		accent_color: 0xc90076,
