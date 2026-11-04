@@ -8,7 +8,7 @@ import {
 import type { Command } from './types';
 import { errorReply } from '../util/errorHandling';
 import { getStringOption, getAutocompleteOption } from '../util/options';
-import { getRosterData, getSensProfile, getGlobalSensProfile } from '../db/query';
+import { getRosterData, getSensProfile, getGlobalSensProfile, SensProfile } from '../db/query';
 import { ALL_CHARACTERS, isAllCharacters, suggestsAllCharacters } from '../util/allCharacters';
 import { isAllowed } from '../util/verification';
 import { buildSensContainer } from '../util/formatting';
@@ -35,7 +35,7 @@ export const setsens: Command = {
 		if (!isAllowed(i, env)) {
 			return errorReply('You are not allowed to use this command.');
 		}
-		let sensProfiles;
+		let sensProfiles: SensProfile[];
 		try {
 			if (!query || isAllCharacters(query)) {
 				sensProfiles = await getGlobalSensProfile(env.DB);

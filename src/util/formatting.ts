@@ -1,10 +1,10 @@
 import {
-	APIComponentInContainer,
 	ComponentType,
+	ButtonStyle,
+	type APIComponentInContainer,
 	type APIContainerComponent,
 	type APITextDisplayComponent,
 	type APISectionComponent,
-	ButtonStyle,
 } from 'discord-api-types/v10';
 import type { SensProfile } from '../db/query';
 const SENS_TYPES = [
@@ -12,14 +12,12 @@ const SENS_TYPES = [
 	{ type: 'Controller', code: 'controller', icon: '🎮' },
 ] as const;
 export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: string, editable: boolean): APIContainerComponent {
-	let components: APIComponentInContainer[];
-
 	// Set the header text
-	let header: APITextDisplayComponent = {
+	const header: APITextDisplayComponent = {
 		type: ComponentType.TextDisplay,
 		content: `**Sens Profiles for ${sensProfiles[0].name}**`,
 	};
-	components = [header];
+	const components: APIComponentInContainer[] = [header];
 
 	// Every row shares the character's slug (the global profile's is ALL_CHARACTERS.value), so it identifies the button target.
 	const slug = sensProfiles[0].slug;
@@ -29,8 +27,9 @@ export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: st
 		const profile = sensProfiles.find((p) => p.type === sensType.type);
 		let content: string;
 		if (profile) {
-			content = `**${sensType.icon} ${profile.type}**\nX-Axis: \`${profile.x_axis ?? 'N/A'}\`\nY-Axis: \`${profile.y_axis ?? 'N/A'}\`\n`;
+			content = `**${sensType.icon} ${profile.type}**\nX-Axis: \`${profile.x_axis}\`\nY-Axis: \`${profile.y_axis}\`\n`;
 			content += profile.dpi !== null ? `DPI: \`${profile.dpi}\`\n` : '';
+			content += `-# Last Updated: ${profile.updated_at ? `<t:${profile.updated_at}:R>` : 'Unknown'}`;
 		} else {
 			content = `**${sensType.icon} ${sensType.type}**\nNo profile available.`;
 		}
@@ -39,14 +38,14 @@ export function buildSensContainer(sensProfiles: SensProfile[], emptyMessage: st
 			content,
 		};
 
-		if (editable && slug) {
+		if (editable) {
 			const section: APISectionComponent = {
 				type: ComponentType.Section,
 				components: [textDisplay],
 				accessory: {
 					type: ComponentType.Button,
 					style: ButtonStyle.Secondary,
-					label: profile?.type ? `Edit` : `Set`,
+					label: profile ? `Edit` : `Set`,
 					custom_id: `setsens:${slug}:${sensType.code}`,
 				},
 			};

@@ -58,11 +58,11 @@ export interface RosterEntry {
 
 export interface SensProfile {
 	name: string;
+	slug: string;
 	type: string | null;
-	slug: string | null;
 	x_axis: string | null;
 	y_axis: string | null;
+	updated_at: number | null;
 	// Only ever set on Mouse & Keyboard rows; NULL when unknown.
 	dpi: number | null;
-	updated_at: number | null;
 }
